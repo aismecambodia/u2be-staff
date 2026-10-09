@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>New Sale · U2BE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--rose:#E46A8C;--sage:#A8C3A0;--white:#F8F8F6;--charcoal:#2B2B2B;--muted:#6b6b6b;--line:#e2e2dd;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--white);color:var(--charcoal);font-family:Inter,"Noto Sans Khmer",system-ui,sans-serif}
+  main{max-width:520px;margin:0 auto;padding:20px 16px 48px}
+  .km{font-family:"Noto Sans Khmer",Inter,sans-serif}
+  a.back{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:23px;margin:12px 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  h2{font-size:16px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  h2 small{font-weight:400;color:var(--muted);font-size:13px}
+  label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+  label .km{font-weight:400;color:var(--muted)}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid #cfcfca;border-radius:10px;background:#fff;color:var(--charcoal)}
+  input:focus,select:focus{outline:2px solid var(--rose);border-color:transparent}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .toggle{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}
+  .toggle input{width:22px;height:22px;accent-color:var(--rose)}
+  .item{border-top:1px dashed var(--line);padding-top:10px;margin-top:12px}
+  .item:first-child{border-top:0;margin-top:0;padding-top:0}
+  .rm{background:none;border:0;color:var(--err);font-size:13px;cursor:pointer;padding:4px 0}
+  .btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+  .primary{background:var(--rose);color:#fff}
+  .ghost{background:#fff;border:1px dashed #c9c9c4;color:var(--charcoal);font-weight:600;font-size:15px;padding:11px}
+  .hidden{display:none}
+  .err{color:var(--err);font-size:14px;margin:10px 0}
+  .warn{background:#fbecea;border-left:5px solid var(--err);color:#7a2318;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+  .sum{font-size:15px;line-height:1.6}
+  .sum b{font-weight:600}
+  .total{font-size:18px;font-weight:700;margin-top:8px}
+  .ok{text-align:center;padding:40px 10px}
+  .ok .big{font-size:48px}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
+  <div id="formView">
+    <h1>New Sale <span class="km">· ការលក់ថ្មី</span></h1>
+    <p class="sub">One form per POS receipt — treatment and/or homecare. <span class="km">ទម្រង់មួយ សម្រាប់វិក្កយបត្រ POS មួយ។</span></p>
+    <div class="warn">Send once only. Made a mistake? Tell Arifin — do not send again.<br><span class="km">ផ្ញើតែម្តង។ បើខុស សូមប្រាប់ Arifin — កុំផ្ញើម្តងទៀត។</span></div>
+
+    <section>
+      <h2>Client &amp; receipt <small class="km">អតិថិជន និងវិក្កយបត្រ</small></h2>
+      <label>Client's own phone * <span class="km">លេខទូរស័ព្ទអតិថិជនផ្ទាល់</span></label>
+      <input id="phone" type="tel" inputmode="tel" placeholder="012 345 678" autocomplete="off">
+      <label>Client name * <span class="km">ឈ្មោះអតិថិជន</span></label>
+      <input id="name" type="text" autocomplete="off">
+      <div class="row">
+        <div><label>POS receipt no * <span class="km">លេខវិក្កយបត្រ</span></label><input id="receipt" type="text" autocomplete="off"></div>
+        <div><label>Date * <span class="km">កាលបរិច្ឆេទ</span></label><input id="date" type="date"></div>
+      </div>
+      <div class="row">
+        <div><label>Closed by * <span class="km">អ្នកលក់</span></label>
+          <select id="closedBy"><option value="">—</option><option>Nateng Nao Sim</option><option>Kimhong</option><option>Chansophal</option><option>Receptionist</option><option>Other</option></select></div>
+        <div><label>Payment <span class="km">ការទូទាត់</span></label>
+          <select id="payment"><option value="">—</option><option>Cash</option><option>QR</option></select></div>
+      </div>
+    </section>
+
+    <section>
+      <label class="toggle"><input id="hasT" type="checkbox"> Treatment sold <span class="km">· លក់វគ្គព្យាបាល</span></label>
+      <div id="tBox" class="hidden">
+        <div class="row">
+          <div><label>Treatment * <span class="km">ការព្យាបាល</span></label>
+            <select id="tType"><option value="">—</option><option value="Acless ">Acless</option><option>FCR</option><option>FOxC</option><option>DNA</option><option>SPIDERMA</option></select></div>
+          <div><label>Package * <span class="km">កញ្ចប់</span></label>
+            <select id="pType"><option value="">—</option><option>Single Session</option><option>6-Session</option><option>8-Session</option><option>Extension</option></select></div>
+        </div>
+        <div class="row">
+          <div><label>Total sessions * <span class="km">ចំនួនវគ្គ</span></label><input id="sessions" type="number" min="1" inputmode="numeric"></div>
+          <div><label>Package price $ * <span class="km">តម្លៃ</span></label><input id="tPrice" type="number" min="0" step="0.01" inputmode="decimal"></div>
+        </div>
+        <div class="row">
+          <div><label>Discount type <span class="km">ប្រភេទបញ្ចុះតម្លៃ</span></label>
+            <select id="tDisc"><option>None</option><option>Glow 10%</option><option>VIP 15%</option><option>Birthday 15%</option><option>Promotion</option><option>Other</option></select></div>
+          <div><label>Discount $ <span class="km">ចំនួនបញ្ចុះ</span></label><input id="tDiscAmt" type="number" min="0" step="0.01" inputmode="decimal"></div>
+        </div>
+        <label>Payment status <span class="km">ស្ថានភាពបង់ប្រាក់</span></label>
+        <select id="pay"><option>Paid</option><option value="Partial ">Partial</option><option>Unpaid</option></select>
+        <label>Note <span class="km">កំណត់ចំណាំ</span></label>
+        <input id="tNote" type="text" placeholder="optional">
+      </div>
+    </section>
+
+    <section>
+      <label class="toggle"><input id="hasP" type="checkbox"> Homecare products sold <span class="km">· លក់ផលិតផលថែទាំ</span></label>
+      <div id="pBox" class="hidden">
+        <div id="items"></div>
+        <button type="button" id="addItem" class="btn ghost" style="margin-top:12px">+ Add product · <span class="km">បន្ថែមផលិតផល</span></button>
+      </div>
+    </section>
+
+    <div id="err" class="err"></div>
+    <button type="button" id="review" class="btn primary">Review · <span class="km">ពិនិត្យ</span></button>
+  </div>
+
+  <div id="confirmView" class="hidden">
+    <h1>Check before sending <span class="km">· ពិនិត្យមុនផ្ញើ</span></h1>
+    <section><div id="summary" class="sum"></div></section>
+    <button type="button" id="send" class="btn primary">Send · <span class="km">ផ្ញើ</span></button>
+    <div style="height:10px"></div>
+    <button type="button" id="edit" class="btn ghost">‹ Edit · <span class="km">កែប្រែ</span></button>
+  </div>
+
+  <div id="doneView" class="hidden ok">
+    <div class="big">✅</div>
+    <h1>Sent to Arifin <span class="km">· បានផ្ញើទៅ Arifin</span></h1>
+    <p class="sub">It appears in Airtable within a minute. <span class="km">នឹងបង្ហាញក្នុង Airtable ក្នុងរយៈពេលមួយនាទី។</span></p>
+    <button type="button" id="again" class="btn primary">New sale · <span class="km">ការលក់ថ្មី</span></button>
+  </div>
+</main>
+
+<script>
+const HOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appgfLBxP1D2cYKAH/wflS5v0qw0P9PRBiH/wtrV6QN9HFAFZ9UaP';
+const PRODUCTS = ['SolarCare 90','SolarCare 50','DeAC Cream','Other'];
+const $ = (id) => document.getElementById(id);
+const show = (id) => ['formView','confirmView','doneView'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+$('date').value = today();
+
+$('hasT').onchange = () => $('tBox').classList.toggle('hidden', !$('hasT').checked);
+$('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').checked); if ($('hasP').checked && !$('items').children.length) addItem(); };
+$('pType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('pType').value]; if (m) $('sessions').value = m; };
+
+function addItem() {
+  if ($('items').children.length >= 5) return;
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.innerHTML = `
+    <label>Product <span class="km">ផលិតផល</span></label>
+    <select class="prod"><option value="">—</option>${PRODUCTS.map(p => `<option>${p}</option>`).join('')}</select>
+    <input class="other hidden" type="text" placeholder="Product name (Other) · ឈ្មោះផលិតផល" style="margin-top:8px">
+    <div class="row">
+      <div><label>Qty <span class="km">ចំនួន</span></label><input class="qty" type="number" min="1" value="1" inputmode="numeric"></div>
+      <div><label>Unit price $ <span class="km">តម្លៃរាយ</span></label><input class="price" type="number" min="0" step="0.01" inputmode="decimal"></div>
+    </div>
+    <div class="row">
+      <div><label>Discount type</label><select class="dtype"><option>None</option><option>Birthday 15%</option><option>Promotion</option><option>Other</option></select></div>
+      <div><label>Discount $</label><input class="damt" type="number" min="0" step="0.01" inputmode="decimal"></div>
+    </div>
+    <button type="button" class="rm">Remove · <span class="km">លុបចេញ</span></button>`;
+  div.querySelector('.prod').onchange = (e) => div.querySelector('.other').classList.toggle('hidden', e.target.value !== 'Other');
+  div.querySelector('.rm').onclick = () => { div.remove(); };
+  $('items').appendChild(div);
+  $('addItem').classList.toggle('hidden', $('items').children.length >= 5);
+}
+$('addItem').onclick = addItem;
+
+let payload = null;
+const money = (v) => '$' + (Number(v) || 0).toFixed(2);
+
+$('review').onclick = () => {
+  const e = [];
+  const phone = $('phone').value.trim(), name = $('name').value.trim(), receipt = $('receipt').value.trim();
+  if (phone.replace(/[^0-9]/g,'').length < 8) e.push('Phone · លេខទូរស័ព្ទ');
+  if (!name) e.push('Client name · ឈ្មោះ');
+  if (!receipt) e.push('POS receipt · វិក្កយបត្រ');
+  if (!$('date').value) e.push('Date · កាលបរិច្ឆេទ');
+  if (!$('closedBy').value) e.push('Closed by · អ្នកលក់');
+  let treatment = null;
+  if ($('hasT').checked) {
+    treatment = { treatmentType: $('tType').value, packageType: $('pType').value, sessions: $('sessions').value, price: $('tPrice').value,
+      discountType: $('tDisc').value, discountAmount: $('tDiscAmt').value, paymentStatus: $('pay').value, note: $('tNote').value.trim() };
+    if (!treatment.treatmentType) e.push('Treatment · ការព្យាបាល');
+    if (!treatment.packageType) e.push('Package · កញ្ចប់');
+    if (!(Number(treatment.sessions) > 0)) e.push('Total sessions · ចំនួនវគ្គ');
+    if (treatment.price === '') e.push('Package price · តម្លៃ');
+  }
+  const products = [];
+  if ($('hasP').checked) {
+    [...$('items').children].forEach((d, i) => {
+      const p = { product: d.querySelector('.prod').value, other: d.querySelector('.other').value.trim(), qty: d.querySelector('.qty').value,
+        unitPrice: d.querySelector('.price').value, discountType: d.querySelector('.dtype').value, discountAmount: d.querySelector('.damt').value };
+      if (!p.product) e.push(`Product ${i+1} · ផលិតផល`);
+      if (p.product === 'Other' && !p.other) e.push(`Product ${i+1} name · ឈ្មោះ`);
+      if (p.unitPrice === '') e.push(`Product ${i+1} price · តម្លៃ`);
+      products.push(p);
+    });
+  }
+  if (!treatment && !products.length) e.push('Tick Treatment and/or Homecare · ជ្រើសរើសយ៉ាងហោចណាស់មួយ');
+  if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
+  $('err').textContent = '';
+  payload = { phone, name, receipt, date: $('date').value, closedBy: $('closedBy').value, payment: $('payment').value, treatment, products };
+
+  let html = `<b>${name}</b> · ${phone}<br>Receipt <b>${receipt}</b> · ${payload.date}<br>Closed by ${payload.closedBy}${payload.payment ? ' · ' + payload.payment : ''}<br>`;
+  let total = 0;
+  if (treatment) {
+    const t = Number(treatment.price) - (Number(treatment.discountAmount) || 0); total += t;
+    html += `<br>💆 <b>${treatment.treatmentType.trim()} · ${treatment.packageType}</b> (${treatment.sessions} sessions)<br>${money(treatment.price)}${Number(treatment.discountAmount) ? ' − ' + money(treatment.discountAmount) + ' (' + treatment.discountType + ')' : ''} = <b>${money(t)}</b> · ${treatment.paymentStatus.trim()}<br>`;
+  }
+  products.forEach(p => {
+    const t = Number(p.qty) * Number(p.unitPrice) - (Number(p.discountAmount) || 0); total += t;
+    html += `<br>🧴 <b>${p.product === 'Other' ? p.other : p.product}</b> × ${p.qty} @ ${money(p.unitPrice)}${Number(p.discountAmount) ? ' − ' + money(p.discountAmount) : ''} = <b>${money(t)}</b>`;
+  });
+  html += `<div class="total">Total · សរុប ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
+  $('summary').innerHTML = html;
+  show('confirmView'); window.scrollTo(0,0);
+};
+$('edit').onclick = () => show('formView');
+
+$('send').onclick = async () => {
+  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Sending…';
+  try {
+    await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) });
+    show('doneView'); window.scrollTo(0,0);
+  } catch (err) {
+    alert('Not sent — check the internet and try again. / មិនទាន់ផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។');
+  }
+  b.disabled = false; b.innerHTML = 'Send · <span class="km">ផ្ញើ</span>';
+};
+
+$('again').onclick = () => {
+  ['phone','name','receipt','sessions','tPrice','tDiscAmt','tNote'].forEach(id => $(id).value = '');
+  ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
+  $('tDisc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
+  $('hasT').checked = false; $('hasP').checked = false; $('tBox').classList.add('hidden'); $('pBox').classList.add('hidden');
+  $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
+  show('formView'); window.scrollTo(0,0);
+};
+</script>
+</body>
+</html>
