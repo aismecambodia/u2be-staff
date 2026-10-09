@@ -134,7 +134,7 @@ $('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').che
 $('pType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('pType').value]; if (m) $('sessions').value = m; };
 
 function addItem() {
-  if ($('items').children.length >= 5) return;
+  if ($('items').children.length >= 10) return;
   const div = document.createElement('div');
   div.className = 'item';
   div.innerHTML = `
@@ -153,7 +153,7 @@ function addItem() {
   div.querySelector('.prod').onchange = (e) => div.querySelector('.other').classList.toggle('hidden', e.target.value !== 'Other');
   div.querySelector('.rm').onclick = () => { div.remove(); };
   $('items').appendChild(div);
-  $('addItem').classList.toggle('hidden', $('items').children.length >= 5);
+  $('addItem').classList.toggle('hidden', $('items').children.length >= 10);
 }
 $('addItem').onclick = addItem;
 
