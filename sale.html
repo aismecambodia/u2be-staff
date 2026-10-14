@@ -150,7 +150,8 @@
 
 <script>
 const HOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appgfLBxP1D2cYKAH/wflS5v0qw0P9PRBiH/wtrV6QN9HFAFZ9UaP';
-const PRODUCTS = ['SolarCare 90','SolarCare 50','DeAC Cream','Other'];
+const PRODUCTS = ["ACCINE BOOSTER Mask", "A Dresser e50ml", "Advance Repair Healing Lotion (Set)", "AXCNE Cream Mask", "AXCNE Modeling Mask (99g)", "Brightening Blemish Contour", "CCC SUN", "Collagen Mask Pack", "DA99 Daily Lifting Toner", "DA99 Lifting Program VITA C", "DA99 Lifting program VITA C (1bottle)", "D Booster 15ml", "DeAC Aciderm Cream e250ml", "DeAC Aciderm Cream e50ml", "DeAC Aciderm Foamgel e100ml", "DeAC Aciderm Serum e30ml", "DeAC Aciderm Solution e15ml", "DeAC Aciderm Toner e100ml", "Dermatone UV Sun Shield", "Dr.Graft Aranea Urban", "Dr.Graft Brush (Black)", "Dr.Graft Brush (Wood)", "Dr.Graft Shampoo", "Dr.Graft Tonic", "Enzyme Powder wash", "Enzyme Powder Wash (Package)", "Enzyme Snow Bubble Cleanser e200ml", "Evening Primrose Oil", "EXO Cicaderm Cream e15ml", "EXOGAR Mask", "EXOGAR Modeling Mask (99g)", "EXOGAR TRASER Mask", "EXO Regentron Cream e50ml", "EXO Regentron Eyecontour e100ml", "EXO Regentron Foamgel 100ml", "Exo Regentron Serum+Cream (Pcs)", "EXO Regentron Serum e30ml", "EXO Regentron Toner e100ml", "Eye & Lip Cream e15ml", "Feg Max Eyelash Serum", "Glow Fit Cushion", "Glow Fit Cushion Refill", "Hair Boost Gummy", "HyCCINE Mask", "HyCCINE Modeling Mask (99g)", "Hydra Bubble Toner e100ml", "Hydraplus Cream 250ml", "Max HydraPlus+ Cream e50ml", "Max HydraPlus+ Serum e30ml", "MELA Brightening Cream e50ml", "MELA Brightening Serum 100ml", "Mela Brightening Serum+Cream (Pcs)", "MELA Brigtening Serum e30ml", "MELA Tyroderm Cream e15ml", "Millford-Sunscreen", "MillFord Wash-Off Pack", "MSN Aciderm Spotgel e15ml", "Nano Touch Chip(5EA)", "Nano Touch Device", "NEXO DP Booster-Bottle", "NEXO DP BOOSTER-Box", "NEXO EG Booster-Bottle", "NEXO EG BOOSTER-Box", "NEXO EG CREAM", "NEXO EG SHOT MASQUE", "NEXO MV12 Booster-Bottle", "NEXO MV12 BOOSTER-Box", "NEXO MV12 CREAM", "NEXO MV12 SHOT MASQUE", "NEXO RC Booster-Bottle", "NEXO RC BOOSTER-Box", "NEXO SD Booster-Bottle", "NEXO SD BOOSTER-Box", "N Reverter 30ml", "N Reveter 15ml", "Optimum 20C Serum", "Orthomin C", "Orthomin E", "PHYBALL Mask", "Post Enzyme Gentle Cleanser", "Premium SOS Red Gel e100ml", "Prime Cleansing Masque e100ml", "Prime EXO Ampoule e100ml", "Prime EXO Ampoule e20ml", "Radicell Cream 50ml", "Radicell Essence 120ml", "Radicell Hydrogel Mask", "RegeniC Mask e50ml", "Regentron Mistic Solution e80ml", "SolarCare 50 Ultra 50g", "SolarCare 90 Gel Fluid e50ml", "Spiderma Ampoule", "Spiderma Cleaning Pad", "Spiderma Cream", "Spiderma + Spicule", "Sweetie Perfume Hands", "Women Multi-Nutrient Gummy", "Other"];
+(() => { const dl = document.createElement('datalist'); dl.id = 'plist'; dl.innerHTML = PRODUCTS.map(p => `<option value="${p.replace(/"/g,'&quot;')}"></option>`).join(''); document.body.appendChild(dl); })();
 const $ = (id) => document.getElementById(id);
 const show = (id) => ['formView','confirmView','doneView'].forEach(v => $(v).classList.toggle('hidden', v !== id));
 const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
@@ -168,7 +169,7 @@ function addItem() {
   div.className = 'item';
   div.innerHTML = `
     <label>Product <span class="km">ផលិតផល</span></label>
-    <select class="prod"><option value="">—</option>${PRODUCTS.map(p => `<option>${p}</option>`).join('')}</select>
+    <input class="prod" list="plist" placeholder="Type to search · វាយដើម្បីស្វែងរក" autocomplete="off">
     <input class="other hidden" type="text" placeholder="Product name (Other) · ឈ្មោះផលិតផល" style="margin-top:8px">
     <div class="row">
       <div><label>Qty <span class="km">ចំនួន</span></label><input class="qty" type="number" min="1" value="1" inputmode="numeric"></div>
@@ -179,7 +180,7 @@ function addItem() {
       <div><label>Discount $</label><input class="damt" type="number" min="0" step="0.01" inputmode="decimal"></div>
     </div>
     <button type="button" class="rm">Remove · <span class="km">លុបចេញ</span></button>`;
-  div.querySelector('.prod').onchange = (e) => div.querySelector('.other').classList.toggle('hidden', e.target.value !== 'Other');
+  div.querySelector('.prod').oninput = (e) => div.querySelector('.other').classList.toggle('hidden', e.target.value.trim() !== 'Other');
   div.querySelector('.rm').onclick = () => { div.remove(); };
   $('items').appendChild(div);
   $('addItem').classList.toggle('hidden', $('items').children.length >= 10);
@@ -220,9 +221,10 @@ $('review').onclick = () => {
   const products = [];
   if ($('hasP').checked) {
     [...$('items').children].forEach((d, i) => {
-      const p = { product: d.querySelector('.prod').value, other: d.querySelector('.other').value.trim(), qty: d.querySelector('.qty').value,
+      const p = { product: d.querySelector('.prod').value.trim(), other: d.querySelector('.other').value.trim(), qty: d.querySelector('.qty').value,
         unitPrice: d.querySelector('.price').value, discountType: d.querySelector('.dtype').value, discountAmount: d.querySelector('.damt').value };
       if (!p.product) e.push(`Product ${i+1} · ផលិតផល`);
+      else if (!PRODUCTS.includes(p.product)) e.push(`Product ${i+1}: pick a name from the list (or Other) · ជ្រើសឈ្មោះពីបញ្ជី`);
       if (p.product === 'Other' && !p.other) e.push(`Product ${i+1} name · ឈ្មោះ`);
       if (p.unitPrice === '') e.push(`Product ${i+1} price · តម្លៃ`);
       products.push(p);
