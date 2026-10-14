@@ -77,7 +77,7 @@
           <div><label>Treatment * <span class="km">ការព្យាបាល</span></label>
             <select id="eType"><option value="">—</option><option value="Acless ">Acless</option><option>FCR</option><option>FOxC</option><option>DNA</option><option>SPIDERMA</option></select></div>
           <div><label>Package * <span class="km">កញ្ចប់</span></label>
-            <select id="ePType"><option value="">—</option><option>Single Session</option><option>6-Session</option><option>8-Session</option><option>Extension</option></select></div>
+            <select id="ePType"><option value="">—</option><option>Single Session</option><option>2-Session</option><option>3-Session</option><option>4-Session</option><option>5-Session</option><option>6-Session</option><option>8-Session</option><option>10-Session</option><option>Extension</option></select></div>
         </div>
         <div class="row">
           <div><label>Total sessions * <span class="km">ចំនួនវគ្គសរុប</span></label><input id="eSessions" type="number" min="1" inputmode="numeric"></div>
@@ -102,7 +102,7 @@
           <div><label>Treatment * <span class="km">ការព្យាបាល</span></label>
             <select id="tType"><option value="">—</option><option value="Acless ">Acless</option><option>FCR</option><option>FOxC</option><option>DNA</option><option>SPIDERMA</option></select></div>
           <div><label>Package * <span class="km">កញ្ចប់</span></label>
-            <select id="pType"><option value="">—</option><option>Single Session</option><option>6-Session</option><option>8-Session</option><option>Extension</option></select></div>
+            <select id="pType"><option value="">—</option><option>Single Session</option><option>2-Session</option><option>3-Session</option><option>4-Session</option><option>5-Session</option><option>6-Session</option><option>8-Session</option><option>10-Session</option><option>Extension</option></select></div>
         </div>
         <div class="row">
           <div><label>Total sessions * <span class="km">ចំនួនវគ្គ</span></label><input id="sessions" type="number" min="1" inputmode="numeric"></div>
@@ -157,10 +157,10 @@ const today = () => { const d = new Date(); return new Date(d.getTime() - d.getT
 $('date').value = today();
 
 $('hasE').onchange = () => $('eBox').classList.toggle('hidden', !$('hasE').checked);
-$('ePType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('ePType').value]; if (m) $('eSessions').value = m; };
+$('ePType').onchange = () => { const m = {'Single Session':1,'2-Session':2,'3-Session':3,'4-Session':4,'5-Session':5,'6-Session':6,'8-Session':8,'10-Session':10}[$('ePType').value]; if (m) $('eSessions').value = m; };
 $('hasT').onchange = () => $('tBox').classList.toggle('hidden', !$('hasT').checked);
 $('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').checked); if ($('hasP').checked && !$('items').children.length) addItem(); };
-$('pType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('pType').value]; if (m) $('sessions').value = m; };
+$('pType').onchange = () => { const m = {'Single Session':1,'2-Session':2,'3-Session':3,'4-Session':4,'5-Session':5,'6-Session':6,'8-Session':8,'10-Session':10}[$('pType').value]; if (m) $('sessions').value = m; };
 
 function addItem() {
   if ($('items').children.length >= 10) return;
