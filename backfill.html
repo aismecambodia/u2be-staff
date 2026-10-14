@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Backfill (POS>CRM) · U2BE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--rose:#E46A8C;--sage:#A8C3A0;--white:#F8F8F6;--charcoal:#2B2B2B;--muted:#6b6b6b;--line:#e2e2dd;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--white);color:var(--charcoal);font-family:Inter,"Noto Sans Khmer",system-ui,sans-serif}
+  main{max-width:520px;margin:0 auto;padding:20px 16px 48px}
+  .km{font-family:"Noto Sans Khmer",Inter,sans-serif}
+  a.back{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:23px;margin:12px 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  h2{font-size:16px;margin:0 0 12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+  h2 small{font-weight:400;color:var(--muted);font-size:13px}
+  label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+  label .km{font-weight:400;color:var(--muted)}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid #cfcfca;border-radius:10px;background:#fff;color:var(--charcoal)}
+  input:focus,select:focus{outline:2px solid var(--rose);border-color:transparent}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .toggle{display:flex;align-items:center;gap:10px;font-weight:600;cursor:pointer}
+  .toggle input{width:22px;height:22px;accent-color:var(--rose)}
+  .item{border-top:1px dashed var(--line);padding-top:10px;margin-top:12px}
+  .item:first-child{border-top:0;margin-top:0;padding-top:0}
+  .rm{background:none;border:0;color:var(--err);font-size:13px;cursor:pointer;padding:4px 0}
+  .btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-size:17px;font-weight:700;cursor:pointer}
+  .primary{background:var(--rose);color:#fff}
+  .ghost{background:#fff;border:1px dashed #c9c9c4;color:var(--charcoal);font-weight:600;font-size:15px;padding:11px}
+  .hidden{display:none}
+  .err{color:var(--err);font-size:14px;margin:10px 0}
+  .warn{background:#fbecea;border-left:5px solid var(--err);color:#7a2318;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+  .sum{font-size:15px;line-height:1.6}
+  .sum b{font-weight:600}
+  .total{font-size:18px;font-weight:700;margin-top:8px}
+  .ok{text-align:center;padding:40px 10px}
+  .ok .big{font-size:48px}
+</style>
+<style>.hint{color:var(--muted);font-size:12px;margin:4px 0 0}</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
+  <div id="formView">
+    <h1>Backfill (POS&gt;CRM) <span class="km">· បញ្ចូលទិន្នន័យចាស់</span></h1>
+    <p class="sub">Unfinished sessions bought before 14 Oct 2026 (paper folder / POS). Once per client — check Sessions Left first. <span class="km">វគ្គព្យាបាលនៅសល់ពីឯកសារក្រដាស។ បញ្ចូលតែម្តង — ពិនិត្យ «វគ្គព្យាបាលនៅសល់» មុន។</span></p>
+    <div class="warn">Only sessions still LEFT. Finished packages, old products and each past visit are NOT entered.<br><span class="km">តែវគ្គព្យាបាលដែលនៅសល់ប៉ុណ្ណោះ។</span></div>
+
+    <section>
+      <h2>Client <small class="km">អតិថិជន</small></h2>
+      <label>Phone (payer or main user) * <span class="km">លេខទូរស័ព្ទ</span></label>
+      <input id="phone" type="tel" inputmode="tel" placeholder="012 345 678" autocomplete="off">
+      <label>Name * <span class="km">ឈ្មោះ</span></label>
+      <input id="name" type="text" autocomplete="off">
+      <label>Entered by * <span class="km">អ្នកបញ្ចូល</span></label>
+      <select id="enteredBy"><option value="">—</option><option>Chansophal</option><option>Nateng Nao Sim</option><option>Kimhong</option><option>Arifin</option><option>Receptionist</option><option>Other</option></select>
+    </section>
+
+    <section>
+      <h2>Sessions from paper <small class="km">វគ្គព្យាបាលពីឯកសារក្រដាស</small></h2>
+      <div class="row">
+        <div><label>Package * <span class="km">កញ្ចប់</span></label>
+          <select id="pType"><option value="">—</option><option>Single Session</option><option>2-Session</option><option>3-Session</option><option>4-Session</option><option>5-Session</option><option>6-Session</option><option>8-Session</option><option>10-Session</option><option>Other</option></select></div>
+        <div><label>Total sessions * <span class="km">វគ្គព្យាបាលសរុប</span></label><input id="sessions" type="number" min="1" inputmode="numeric"></div>
+      </div>
+      <label>Sessions already used * <span class="km">វគ្គព្យាបាលបានប្រើរួច</span></label>
+      <input id="used" type="number" min="0" inputmode="numeric">
+      <p class="hint">From the paper folder. If you enter it on a visit day, do NOT count today's visit. <span class="km">បើបញ្ចូលនៅថ្ងៃមក កុំរាប់ថ្ងៃនេះ។</span></p>
+      <label>Shared with (names, optional) <span class="km">ប្រើរួមជាមួយ (ឈ្មោះ)</span></label>
+      <input id="sharedWith" type="text" placeholder="e.g. son Dara, daughter Sreyneang" autocomplete="off">
+      <div class="row">
+        <div><label>Purchase date <span class="km">ថ្ងៃទិញ</span></label><input id="pDate" type="date"></div>
+        <div><label>Old receipt no <span class="km">វិក្កយបត្រចាស់</span></label><input id="receipt" type="text" placeholder="OLD" autocomplete="off"></div>
+      </div>
+      <label>Price paid $ <span class="km">តម្លៃ (បើដឹង)</span></label>
+      <input id="price" type="number" min="0" step="0.01" inputmode="decimal" placeholder="optional">
+      <label>Note <span class="km">កំណត់ចំណាំ</span></label>
+      <input id="note" type="text" placeholder="optional">
+    </section>
+
+    <div id="err" class="err"></div>
+    <button type="button" id="review" class="btn primary">Review · <span class="km">ពិនិត្យ</span></button>
+  </div>
+
+  <div id="confirmView" class="hidden">
+    <h1>Check before sending <span class="km">· ពិនិត្យមុនផ្ញើ</span></h1>
+    <section><div id="summary" class="sum"></div></section>
+    <button type="button" id="send" class="btn primary">Send · <span class="km">ផ្ញើ</span></button>
+    <div style="height:10px"></div>
+    <button type="button" id="edit" class="btn ghost">‹ Edit · <span class="km">កែប្រែ</span></button>
+  </div>
+
+  <div id="doneView" class="hidden ok">
+    <div class="big">✅</div>
+    <h1>Saved <span class="km">· បានរក្សាទុក</span></h1>
+    <p class="sub">It appears in Sessions Left within a minute. <span class="km">នឹងបង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់» ក្នុងមួយនាទី។</span></p>
+    <button type="button" id="again" class="btn primary">Next client · <span class="km">អតិថិជនបន្ទាប់</span></button>
+  </div>
+</main>
+<script>
+const HOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appgfLBxP1D2cYKAH/wflS5v0qw0P9PRBiH/wtrV6QN9HFAFZ9UaP';
+const SIZES = {'Single Session':1,'2-Session':2,'3-Session':3,'4-Session':4,'5-Session':5,'6-Session':6,'8-Session':8,'10-Session':10};
+const $ = (id) => document.getElementById(id);
+const show = (id) => ['formView','confirmView','doneView'].forEach(v => $(v).classList.toggle('hidden', v !== id));
+const LS = 'u2be_enteredBy';
+try { const v = localStorage.getItem(LS); if (v) $('enteredBy').value = v; } catch (e) {}
+$('pType').onchange = () => { const m = SIZES[$('pType').value]; if (m) $('sessions').value = m; else { $('sessions').value = ''; $('sessions').focus(); } };
+let payload = null;
+$('review').onclick = () => {
+  const e = [];
+  const phone = $('phone').value.trim(), name = $('name').value.trim();
+  if (phone.replace(/[^0-9]/g,'').length < 8) e.push('Phone · លេខទូរស័ព្ទ');
+  if (!name) e.push('Name · ឈ្មោះ');
+  if (!$('enteredBy').value) e.push('Entered by · អ្នកបញ្ចូល');
+  const total = Number($('sessions').value), used = $('used').value;
+  if (!$('pType').value) e.push('Package · កញ្ចប់');
+  if (!(total > 0)) e.push('Total sessions · វគ្គព្យាបាលសរុប');
+  if (used === '' || Number(used) < 0) e.push('Sessions already used · វគ្គព្យាបាលបានប្រើរួច');
+  else if (Number(used) >= total) e.push('No sessions left — do not enter · គ្មានវគ្គព្យាបាលនៅសល់ — កុំបញ្ចូល');
+  if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
+  $('err').textContent = '';
+  try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
+  const d = new Date(); const today = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
+  payload = { form: 'backfill', phone, name, date: today, enteredBy: $('enteredBy').value, packageType: $('pType').value, sessions: String(total), used,
+    sharedWith: $('sharedWith').value.trim(), purchaseDate: $('pDate').value, receipt: $('receipt').value.trim(), price: $('price').value, note: $('note').value.trim() };
+  $('summary').innerHTML = `<b>${name}</b> · ${phone}<br>Entered by ${payload.enteredBy}<br><br>📁 <b>${payload.packageType}</b> · ${total} sessions · ${used} used · <b>${total - Number(used)} left</b>${payload.sharedWith ? '<br>Shared with: ' + payload.sharedWith : ''}<br>Receipt ${payload.receipt || 'OLD'}${payload.purchaseDate ? ' · bought ' + payload.purchaseDate : ''}${payload.price ? ' · $' + payload.price : ''}<div class="sub" style="margin-top:8px">Sessions left must match the paper folder. · ត្រូវតែដូចឯកសារក្រដាស។</div>`;
+  show('confirmView'); window.scrollTo(0,0);
+};
+$('edit').onclick = () => show('formView');
+$('send').onclick = async () => {
+  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Sending…';
+  try { await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) }); show('doneView'); window.scrollTo(0,0); }
+  catch (err) { alert('Not sent — check the internet and try again. / មិនទាន់ផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
+  b.disabled = false; b.innerHTML = 'Send · <span class="km">ផ្ញើ</span>';
+};
+$('again').onclick = () => { ['phone','name','sessions','used','sharedWith','pDate','receipt','price','note'].forEach(id => $(id).value = ''); $('pType').value = ''; payload = null; show('formView'); window.scrollTo(0,0); };
+</script>
+</body>
+</html>
