@@ -47,7 +47,7 @@
   <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
   <div id="formView">
     <h1>New Sale <span class="km">· ការលក់ថ្មី</span></h1>
-    <p class="sub">One form per POS receipt — treatment and/or homecare. <span class="km">ទម្រង់មួយ សម្រាប់វិក្កយបត្រ POS មួយ។</span></p>
+    <p class="sub">One form per client visit: an existing package (bought before the CRM), and/or treatment and homecare sold today. <span class="km">ទម្រង់មួយ សម្រាប់ការមកម្តង៖ កញ្ចប់ចាស់ និង/ឬ ការលក់ថ្ងៃនេះ។</span></p>
     <div class="warn">Send once only. Made a mistake? Tell Arifin — do not send again.<br><span class="km">ផ្ញើតែម្តង។ បើខុស សូមប្រាប់ Arifin — កុំផ្ញើម្តងទៀត។</span></div>
 
     <section>
@@ -57,14 +57,41 @@
       <label>Client name * <span class="km">ឈ្មោះអតិថិជន</span></label>
       <input id="name" type="text" autocomplete="off">
       <div class="row">
-        <div><label>POS receipt no * <span class="km">លេខវិក្កយបត្រ</span></label><input id="receipt" type="text" autocomplete="off"></div>
+        <div><label>POS receipt no <span class="km">លេខវិក្កយបត្រ</span></label><input id="receipt" type="text" autocomplete="off"></div>
         <div><label>Date * <span class="km">កាលបរិច្ឆេទ</span></label><input id="date" type="date"></div>
       </div>
       <div class="row">
-        <div><label>Closed by * <span class="km">អ្នកលក់</span></label>
+        <div><label>Closed by <span class="km">អ្នកលក់</span></label>
           <select id="closedBy"><option value="">—</option><option>Nateng Nao Sim</option><option>Kimhong</option><option>Chansophal</option><option>Receptionist</option><option>Other</option></select></div>
         <div><label>Payment <span class="km">ការទូទាត់</span></label>
           <select id="payment"><option value="">—</option><option>Cash</option><option>QR</option></select></div>
+      </div>
+      <p class="sub" style="margin:10px 0 0">Receipt and Closed by are required when something is sold today. <span class="km">ត្រូវបំពេញ ពេលមានការលក់ថ្ងៃនេះ។</span></p>
+    </section>
+
+    <section>
+      <label class="toggle"><input id="hasE" type="checkbox"> Existing package (bought before CRM) <span class="km">· កញ្ចប់ចាស់</span></label>
+      <div id="eBox" class="hidden">
+        <p class="sub" style="margin:10px 0 0">Only if the client still has sessions left, and only the first time. <span class="km">តែពេលនៅសល់វគ្គ និងបញ្ចូលតែម្តងប៉ុណ្ណោះ។</span></p>
+        <div class="row">
+          <div><label>Treatment * <span class="km">ការព្យាបាល</span></label>
+            <select id="eType"><option value="">—</option><option value="Acless ">Acless</option><option>FCR</option><option>FOxC</option><option>DNA</option><option>SPIDERMA</option></select></div>
+          <div><label>Package * <span class="km">កញ្ចប់</span></label>
+            <select id="ePType"><option value="">—</option><option>Single Session</option><option>6-Session</option><option>8-Session</option><option>Extension</option></select></div>
+        </div>
+        <div class="row">
+          <div><label>Total sessions * <span class="km">ចំនួនវគ្គសរុប</span></label><input id="eSessions" type="number" min="1" inputmode="numeric"></div>
+          <div><label>Done before today * <span class="km">បានធ្វើរួច (មុនថ្ងៃនេះ)</span></label><input id="eDone" type="number" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="row">
+          <div><label>Purchase date <span class="km">ថ្ងៃទិញ</span></label><input id="eDate" type="date"></div>
+          <div><label>Old receipt no <span class="km">វិក្កយបត្រចាស់</span></label><input id="eReceipt" type="text" placeholder="OLD" autocomplete="off"></div>
+        </div>
+        <label>Package price $ <span class="km">តម្លៃ (បើដឹង)</span></label>
+        <input id="ePrice" type="number" min="0" step="0.01" inputmode="decimal" placeholder="optional">
+        <label>Note <span class="km">កំណត់ចំណាំ</span></label>
+        <input id="eNote" type="text" placeholder="optional">
+        <div class="warn" style="margin:12px 0 0">Do NOT count today's visit — the system counts it. <span class="km">កុំរាប់វគ្គថ្ងៃនេះ — ប្រព័ន្ធរាប់ដោយស្វ័យប្រវត្តិ។</span></div>
       </div>
     </section>
 
@@ -129,6 +156,8 @@ const show = (id) => ['formView','confirmView','doneView'].forEach(v => $(v).cla
 const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 $('date').value = today();
 
+$('hasE').onchange = () => $('eBox').classList.toggle('hidden', !$('hasE').checked);
+$('ePType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('ePType').value]; if (m) $('eSessions').value = m; };
 $('hasT').onchange = () => $('tBox').classList.toggle('hidden', !$('hasT').checked);
 $('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').checked); if ($('hasP').checked && !$('items').children.length) addItem(); };
 $('pType').onchange = () => { const m = {'Single Session':1,'6-Session':6,'8-Session':8}[$('pType').value]; if (m) $('sessions').value = m; };
@@ -165,9 +194,20 @@ $('review').onclick = () => {
   const phone = $('phone').value.trim(), name = $('name').value.trim(), receipt = $('receipt').value.trim();
   if (phone.replace(/[^0-9]/g,'').length < 8) e.push('Phone · លេខទូរស័ព្ទ');
   if (!name) e.push('Client name · ឈ្មោះ');
-  if (!receipt) e.push('POS receipt · វិក្កយបត្រ');
+  const selling = $('hasT').checked || $('hasP').checked;
   if (!$('date').value) e.push('Date · កាលបរិច្ឆេទ');
-  if (!$('closedBy').value) e.push('Closed by · អ្នកលក់');
+  if (selling && !receipt) e.push('POS receipt · វិក្កយបត្រ');
+  if (selling && !$('closedBy').value) e.push('Closed by · អ្នកលក់');
+  let existing = null;
+  if ($('hasE').checked) {
+    existing = { treatmentType: $('eType').value, packageType: $('ePType').value, sessions: $('eSessions').value, doneBefore: $('eDone').value,
+      purchaseDate: $('eDate').value, receipt: $('eReceipt').value.trim(), price: $('ePrice').value, note: $('eNote').value.trim() };
+    if (!existing.treatmentType) e.push('Existing: treatment · ការព្យាបាល');
+    if (!existing.packageType) e.push('Existing: package · កញ្ចប់');
+    if (!(Number(existing.sessions) > 0)) e.push('Existing: total sessions · ចំនួនវគ្គ');
+    if (existing.doneBefore === '' || Number(existing.doneBefore) < 0) e.push('Existing: done before today · បានធ្វើរួច');
+    else if (Number(existing.doneBefore) >= Number(existing.sessions)) e.push('Existing: no sessions left — do not enter this package · គ្មានវគ្គនៅសល់');
+  }
   let treatment = null;
   if ($('hasT').checked) {
     treatment = { treatmentType: $('tType').value, packageType: $('pType').value, sessions: $('sessions').value, price: $('tPrice').value,
@@ -188,12 +228,16 @@ $('review').onclick = () => {
       products.push(p);
     });
   }
-  if (!treatment && !products.length) e.push('Tick Treatment and/or Homecare · ជ្រើសរើសយ៉ាងហោចណាស់មួយ');
+  if (!existing && !treatment && !products.length) e.push('Tick at least one: Existing package, Treatment or Homecare · ជ្រើសរើសយ៉ាងហោចណាស់មួយ');
   if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
   $('err').textContent = '';
-  payload = { phone, name, receipt, date: $('date').value, closedBy: $('closedBy').value, payment: $('payment').value, treatment, products };
+  payload = { phone, name, receipt, date: $('date').value, closedBy: $('closedBy').value, payment: $('payment').value, existing, treatment, products };
 
-  let html = `<b>${name}</b> · ${phone}<br>Receipt <b>${receipt}</b> · ${payload.date}<br>Closed by ${payload.closedBy}${payload.payment ? ' · ' + payload.payment : ''}<br>`;
+  let html = `<b>${name}</b> · ${phone}<br>${payload.date}${receipt ? ' · Receipt <b>' + receipt + '</b>' : ''}${payload.closedBy ? '<br>Closed by ' + payload.closedBy : ''}${payload.payment ? ' · ' + payload.payment : ''}<br>`;
+  if (existing) {
+    const left = Number(existing.sessions) - Number(existing.doneBefore);
+    html += `<br>📁 <b>Existing: ${existing.treatmentType.trim()} · ${existing.packageType}</b><br>${existing.sessions} sessions · ${existing.doneBefore} done before today · <b>${left} left incl. today</b><br>`;
+  }
   let total = 0;
   if (treatment) {
     const t = Number(treatment.price) - (Number(treatment.discountAmount) || 0); total += t;
@@ -203,7 +247,7 @@ $('review').onclick = () => {
     const t = Number(p.qty) * Number(p.unitPrice) - (Number(p.discountAmount) || 0); total += t;
     html += `<br>🧴 <b>${p.product === 'Other' ? p.other : p.product}</b> × ${p.qty} @ ${money(p.unitPrice)}${Number(p.discountAmount) ? ' − ' + money(p.discountAmount) : ''} = <b>${money(t)}</b>`;
   });
-  html += `<div class="total">Total · សរុប ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
+  if (treatment || products.length) html += `<div class="total">Total today · សរុបថ្ងៃនេះ ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
   $('summary').innerHTML = html;
   show('confirmView'); window.scrollTo(0,0);
 };
@@ -221,8 +265,9 @@ $('send').onclick = async () => {
 };
 
 $('again').onclick = () => {
-  ['phone','name','receipt','sessions','tPrice','tDiscAmt','tNote'].forEach(id => $(id).value = '');
-  ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
+  ['phone','name','receipt','sessions','tPrice','tDiscAmt','tNote','eSessions','eDone','eDate','eReceipt','ePrice','eNote'].forEach(id => $(id).value = '');
+  ['tType','pType','closedBy','payment','eType','ePType'].forEach(id => $(id).value = '');
+  $('hasE').checked = false; $('eBox').classList.add('hidden');
   $('tDisc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
   $('hasT').checked = false; $('hasP').checked = false; $('tBox').classList.add('hidden'); $('pBox').classList.add('hidden');
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
