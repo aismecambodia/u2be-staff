@@ -1,4 +1,4 @@
-// Phone → name lookup for the staff forms (Client Record, Backfill).
+// Phone ↔ name lookup for the staff forms (Client Record, Backfill), and prefill from appointment links.
 // Works only on links that carry the staff key (#k=…, from the Softr apps
 // or the pinned staff link). Without it, the form works as before.
 (function () {
@@ -17,6 +17,12 @@
 
   var phone = document.getElementById('phone'), name = document.getElementById('name');
   if (!phone || !name) return;
+  // Prefill from an appointment link: ?phone=…&name=…&date=YYYY-MM-DD
+  var P = new URLSearchParams(location.search), prefilled = false;
+  if (P.get('phone') && !phone.value) { phone.value = P.get('phone'); prefilled = true; }
+  if (P.get('name') && !name.value) { name.value = P.get('name'); name.dataset.auto = '1'; }
+  var dateEl = document.getElementById('date');
+  if (dateEl && /^\d{4}-\d{2}-\d{2}$/.test(P.get('date') || '')) dateEl.value = P.get('date');
   var out = document.createElement('p');
   out.className = 'hint';
   out.id = 'lookup';
@@ -68,8 +74,42 @@
       })
       .catch(function (e) { last = ''; if (e && e.message === '403') { try { localStorage.removeItem(LS); } catch (x) {} } show(e && e.message === '403' ? 'Staff code not accepted (A) — reload the page and type the code again. · លេខកូដមិនត្រឹមត្រូវ' : 'Lookup not reachable (B) — check internet. Type the name. · សូមវាយឈ្មោះ'); });
   }
-  phone.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(look, 600); });
+  // Name search: type 3+ letters of the name → pick the client from a list.
+  var list = document.createElement('div');
+  list.id = 'nameList';
+  list.style.cssText = 'margin-top:6px;display:none';
+  name.insertAdjacentElement('afterend', list);
+  var ntimer = null, nlast = '';
+  function hideList() { list.style.display = 'none'; list.innerHTML = ''; }
+  function nameSearch() {
+    var q = name.value.toLowerCase().replace(/[^a-z0-9\u1780-\u17ff]/g, '');
+    if (q.length < 3 || q === nlast) { if (q.length < 3) hideList(); return; }
+    nlast = q;
+    fetch(API + '?name=' + encodeURIComponent(q), { headers: { 'X-Staff-Key': key } })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (name.value.toLowerCase().replace(/[^a-z0-9\u1780-\u17ff]/g, '') !== q) return;
+        var items = (j && j.list) || [];
+        if (!items.length) { list.innerHTML = '<p class="hint">No client found with this name — type the phone. · រកមិនឃើញ — សូមវាយលេខទូរស័ព្ទ</p>'; list.style.display = 'block'; return; }
+        list.innerHTML = '<p class="hint" style="margin:0 0 4px">Tap the client · ចុចលើអតិថិជន</p>';
+        items.forEach(function (it) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'btn';
+          b.style.cssText = 'display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;font-weight:400';
+          b.textContent = it.name + ' · ' + it.phone + ' · ' + it.left + ' left';
+          b.onclick = function () { phone.value = it.phone; name.value = it.name; name.dataset.auto = '1'; hideList(); last = ''; look(); };
+          list.appendChild(b);
+        });
+        list.style.display = 'block';
+      })
+      .catch(function () { nlast = ''; });
+  }
+  name.addEventListener('input', function () { if (name.dataset.auto === '1') return; clearTimeout(ntimer); ntimer = setTimeout(nameSearch, 600); });
+
+  phone.addEventListener('input', function () { hideList(); clearTimeout(timer); timer = setTimeout(look, 600); });
+  if (prefilled) look();
   phone.addEventListener('blur', look);
   var again = document.getElementById('again');
-  if (again) again.addEventListener('click', function () { last = ''; show(''); name.dataset.auto = ''; });
+  if (again) again.addEventListener('click', function () { last = ''; nlast = ''; show(''); hideList(); name.dataset.auto = ''; history.replaceState(null, '', location.pathname); });
 })();
