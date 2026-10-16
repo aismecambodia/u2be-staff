@@ -21,7 +21,19 @@
   out.className = 'hint';
   out.id = 'lookup';
   phone.insertAdjacentElement('afterend', out);
-  if (!key) { out.textContent = 'Name lookup is off on this device — open the form from the app menu. · សូមបើកពីម៉ឺនុយកម្មវិធី'; return; }
+  if (!key) {
+    out.innerHTML = 'Name lookup: type the staff code once on this device · វាយលេខកូដបុគ្គលិកម្តង<br>' +
+      '<input id="lkCode" type="text" autocapitalize="off" autocomplete="off" placeholder="staff code" style="width:140px;margin-top:6px"> ' +
+      '<button type="button" id="lkSave" class="btn" style="padding:6px 12px">Save · រក្សាទុក</button>';
+    document.getElementById('lkSave').onclick = function () {
+      var c = (document.getElementById('lkCode').value || '').trim().toLowerCase();
+      if (!c) return;
+      try { localStorage.setItem(LS, c); } catch (e) {}
+      location.reload();
+    };
+    return;
+  }
+  out.dataset.key = '1';
 
   name.addEventListener('input', function () { name.dataset.auto = ''; });
 
@@ -54,7 +66,7 @@
           show('Lookup error (C) — type the name. · សូមវាយឈ្មោះ');
         }
       })
-      .catch(function (e) { last = ''; show(e && e.message === '403' ? 'Lookup code not accepted (A) — tell Coach Dara. Type the name. · សូមវាយឈ្មោះ' : 'Lookup not reachable (B) — check internet. Type the name. · សូមវាយឈ្មោះ'); });
+      .catch(function (e) { last = ''; if (e && e.message === '403') { try { localStorage.removeItem(LS); } catch (x) {} } show(e && e.message === '403' ? 'Staff code not accepted (A) — reload the page and type the code again. · លេខកូដមិនត្រឹមត្រូវ' : 'Lookup not reachable (B) — check internet. Type the name. · សូមវាយឈ្មោះ'); });
   }
   phone.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(look, 600); });
   phone.addEventListener('blur', look);
