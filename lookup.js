@@ -5,12 +5,15 @@
   var API = 'https://u2be-skin-scan.netlify.app/api/client';
   var LS = 'u2be_staffkey';
   var key = '';
-  var m = location.hash.match(/k=([A-Za-z0-9_-]+)/);
+  var m = (location.hash + '&' + location.search).match(/[#?&]k=([A-Za-z0-9_-]+)/);
   try {
-    if (m) { localStorage.setItem(LS, m[1]); history.replaceState(null, '', location.pathname + location.search); }
+    if (m) {
+      localStorage.setItem(LS, m[1]);
+      var qs = location.search.replace(/([?&])k=[^&]*&?/, '$1').replace(/[?&]$/, '');
+      history.replaceState(null, '', location.pathname + qs);
+    }
     key = localStorage.getItem(LS) || '';
   } catch (e) { key = m ? m[1] : ''; }
-  if (!key) return;
 
   var phone = document.getElementById('phone'), name = document.getElementById('name');
   if (!phone || !name) return;
@@ -18,6 +21,7 @@
   out.className = 'hint';
   out.id = 'lookup';
   phone.insertAdjacentElement('afterend', out);
+  if (!key) { out.textContent = 'Name lookup is off on this device — open the form from the app menu. · សូមបើកពីម៉ឺនុយកម្មវិធី'; return; }
 
   name.addEventListener('input', function () { name.dataset.auto = ''; });
 
