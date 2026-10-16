@@ -39,7 +39,7 @@
     last = d;
     show('Checking… · កំពុងពិនិត្យ…');
     fetch(API + '?phone=' + encodeURIComponent(d), { headers: { 'X-Staff-Key': key } })
-      .then(function (r) { return r.json(); })
+      .then(function (r) { if (r.status === 403) throw new Error('403'); return r.json(); })
       .then(function (j) {
         if (digits(phone.value) !== d) return;
         if (j.found === 1) {
@@ -51,10 +51,10 @@
           if (name.dataset.auto === '1') { name.value = ''; name.dataset.auto = ''; }
           show('Not in the CRM — new client? Type the name. · មិនមានក្នុង CRM — អតិថិជនថ្មី? សូមវាយឈ្មោះ', '#9a6a00');
         } else {
-          show('Lookup not available — type the name. · សូមវាយឈ្មោះ');
+          show('Lookup error (C) — type the name. · សូមវាយឈ្មោះ');
         }
       })
-      .catch(function () { last = ''; show('Lookup not available — type the name. · សូមវាយឈ្មោះ'); });
+      .catch(function (e) { last = ''; show(e && e.message === '403' ? 'Lookup code not accepted (A) — tell Coach Dara. Type the name. · សូមវាយឈ្មោះ' : 'Lookup not reachable (B) — check internet. Type the name. · សូមវាយឈ្មោះ'); });
   }
   phone.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(look, 600); });
   phone.addEventListener('blur', look);
