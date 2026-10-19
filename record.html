@@ -80,6 +80,7 @@
           <label><input type="radio" name="from" value="Shared"> Shared · <span class="km">ប្រើរួម</span></label>
         </div>
         <div id="payerBox" class="hidden">
+          <p class="hint" id="sharedInfo"></p>
           <label>Shared sessions of (payer's name) <span class="km">ប្រើវគ្គព្យាបាលរួមជាមួយ (ឈ្មោះអ្នកបង់)</span></label>
           <input id="payer" type="text" autocomplete="off">
         </div>
@@ -105,8 +106,16 @@
             <select id="disc"><option>None</option><option>Glow 10%</option><option>VIP 15%</option><option>Birthday 15%</option><option>Promotion</option><option>Other</option></select></div>
           <div><label>Discount $ <span class="km">ចំនួនបញ្ចុះ</span></label><input id="discAmt" type="number" min="0" step="0.01" inputmode="decimal"></div>
         </div>
-        <label>Shared with (names, optional) <span class="km">ប្រើរួមជាមួយ (ឈ្មោះ)</span></label>
-        <input id="sharedWith" type="text" placeholder="e.g. daughter Sreyneang" autocomplete="off">
+        <label>For <span class="km">សម្រាប់</span></label>
+        <div class="radios">
+          <label><input type="radio" name="bfor" value="own" checked> This client only · <span class="km">សម្រាប់អតិថិជននេះ</span></label>
+          <label><input type="radio" name="bfor" value="shared"> Shared group · <span class="km">ប្រើរួមជាមួយក្រុម</span></label>
+        </div>
+        <div id="bSharedBox" class="hidden">
+          <p class="hint" id="bSharedInfo">Saved under the payer (master client) as a Shared package. <span class="km">រក្សាទុកក្រោមអ្នកបង់ ជាកញ្ចប់ប្រើរួម។</span></p>
+          <label>Shared with (names) <span class="km">ប្រើរួមជាមួយ (ឈ្មោះ)</span></label>
+          <input id="sharedWith" type="text" placeholder="e.g. son Dara, daughter Sreyneang" autocomplete="off">
+        </div>
         <label>Note <span class="km">កំណត់ចំណាំ</span></label>
         <input id="bNote" type="text" placeholder="optional">
         <p class="hint">Client still has sessions left? Send anyway — Arifin adds them to her balance. <span class="km">នៅសល់វគ្គ? ផ្ញើដដែល — Arifin បូកបញ្ចូល។</span></p>
@@ -169,6 +178,26 @@ const fromVal = () => (document.querySelector('input[name=from]:checked') || {})
 const syncSale = () => $('saleBox').classList.toggle('hidden', !($('hasB').checked || $('hasP').checked));
 $('tType').onchange = () => $('fromBox').classList.toggle('hidden', $('tType').value === 'none');
 document.querySelectorAll('input[name=from]').forEach(r => r.onchange = () => $('payerBox').classList.toggle('hidden', fromVal() !== 'Shared'));
+const forVal = () => (document.querySelector('input[name=bfor]:checked') || {}).value || 'own';
+document.querySelectorAll('input[name=bfor]').forEach(r => r.onchange = () => $('bSharedBox').classList.toggle('hidden', forVal() !== 'shared'));
+// Sub-client (has a master client): preselect Shared and fill the payer from the CRM
+let lk = null;
+document.addEventListener('u2be:client', (ev) => {
+  lk = ev.detail || null;
+  const m = lk && lk.master ? String(lk.master) : '';
+  if (m) {
+    document.querySelector('input[name=from][value=Shared]').checked = true;
+    $('payerBox').classList.remove('hidden');
+    $('payer').value = m; $('payer').readOnly = true;
+    const left = Number(lk.sharedLeft) || 0;
+    $('sharedInfo').innerHTML = '👥 Shared package of <b>' + m.replace(/</g,'&lt;') + '</b> · ' + left + ' left' + (left <= 0 ? ' — <b style="color:#C0392B">0 left: sell a package below (For: this client only, or Shared group)</b>' : '') + ' <span class="km">កញ្ចប់ប្រើរួម</span>';
+    $('bSharedInfo').innerHTML = 'Top-up for the shared group of <b>' + m.replace(/</g,'&lt;') + '</b> (saved under the payer). <span class="km">បន្ថែមវគ្គក្នុងកញ្ចប់ប្រើរួម។</span>';
+  } else {
+    if ($('payer').readOnly) { $('payer').value = ''; $('payer').readOnly = false; document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); }
+    $('sharedInfo').textContent = '';
+    $('bSharedInfo').innerHTML = 'This client becomes the payer (master) of a new Shared package. Arifin links the other users. <span class="km">អតិថិជននេះជាអ្នកបង់កញ្ចប់ប្រើរួម។</span>';
+  }
+});
 $('hasB').onchange = () => { $('bBox').classList.toggle('hidden', !$('hasB').checked); syncSale(); };
 $('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').checked); if ($('hasP').checked && !$('items').children.length) addItem(); syncSale(); };
 $('pType').onchange = () => { const m = SIZES[$('pType').value]; if (m) $('sessions').value = m; else { $('sessions').value = ''; $('sessions').focus(); } };
@@ -218,7 +247,7 @@ $('review').onclick = () => {
   let bought = null;
   if ($('hasB').checked) {
     bought = { packageType: $('pType').value, sessions: $('sessions').value, price: $('price').value, paymentStatus: $('pay').value,
-      discountType: $('disc').value, discountAmount: $('discAmt').value, sharedWith: $('sharedWith').value.trim(), note: $('bNote').value.trim() };
+      discountType: $('disc').value, discountAmount: $('discAmt').value, for: forVal(), sharedWith: forVal() === 'shared' ? $('sharedWith').value.trim() : '', note: $('bNote').value.trim() };
     if (!bought.packageType) e.push('Package · កញ្ចប់');
     if (!(Number(bought.sessions) > 0)) e.push('Sessions · ចំនួនវគ្គព្យាបាល');
     if (bought.price === '') e.push('Price · តម្លៃ');
@@ -251,7 +280,7 @@ $('review').onclick = () => {
   let total = 0;
   if (bought) {
     const t = Number(bought.price) - (Number(bought.discountAmount) || 0); total += t;
-    html += `<br>💆 <b>${bought.packageType}</b> (${bought.sessions} sessions) · ${money(bought.price)}${Number(bought.discountAmount) ? ' − ' + money(bought.discountAmount) + ' (' + bought.discountType + ')' : ''} = <b>${money(t)}</b> · ${bought.paymentStatus.trim()}${bought.sharedWith ? '<br>Shared with: ' + bought.sharedWith : ''}<br>`;
+    html += `<br>💆 <b>${bought.packageType}</b> (${bought.sessions} sessions) · ${money(bought.price)}${Number(bought.discountAmount) ? ' − ' + money(bought.discountAmount) + ' (' + bought.discountType + ')' : ''} = <b>${money(t)}</b> · ${bought.paymentStatus.trim()}<br>For: <b>${bought.for === 'shared' ? 'Shared group' + (lk && lk.master ? ' of ' + lk.master : ' (this client = payer)') : 'this client only'}</b>${bought.sharedWith ? ' · with ' + bought.sharedWith : ''}<br>`;
   }
   products.forEach(p => {
     const t = Number(p.qty) * Number(p.unitPrice) - (Number(p.discountAmount) || 0); total += t;
@@ -275,11 +304,13 @@ $('again').onclick = () => {
   ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
   $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
   document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); $('fromBox').classList.remove('hidden');
+  $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null;
+  document.querySelector('input[name=bfor][value=own]').checked = true; $('bSharedBox').classList.add('hidden');
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
   show('formView'); window.scrollTo(0,0);
 };
 </script>
-<script src="./lookup.js?v=5"></script>
+<script src="./lookup.js?v=6"></script>
 </body>
 </html>
