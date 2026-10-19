@@ -48,8 +48,8 @@
   <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
   <div id="formView">
     <h1>Backfill (POS&gt;CRM) <span class="km">· បញ្ចូលទិន្នន័យចាស់</span></h1>
-    <p class="sub">Unfinished sessions bought before 14 Oct 2026 (paper folder / POS). Once per client — check Sessions Left first. <span class="km">វគ្គព្យាបាលនៅសល់ពីឯកសារក្រដាស។ បញ្ចូលតែម្តង — ពិនិត្យ «វគ្គព្យាបាលនៅសល់» មុន។</span></p>
-    <div class="warn">Only sessions still LEFT. Finished packages, old products and each past visit are NOT entered.<br><span class="km">តែវគ្គព្យាបាលដែលនៅសល់ប៉ុណ្ណោះ។</span></div>
+    <p class="sub">Every package or single session bought before 14 Oct 2026 (paper folder / POS) — unfinished AND finished. One form per package, sent once. Check Client Profile / Sessions Left first. <span class="km">កញ្ចប់ ឬវគ្គទោលទាំងអស់ពីឯកសារក្រដាស — ទាំងនៅសល់ និងប្រើអស់។ មួយទម្រង់ក្នុងមួយកញ្ចប់ ផ្ញើតែម្តង។</span></p>
+    <div class="warn">Finished package: set "Sessions already used" = Total sessions (0 left). Old products and each past visit are NOT entered.<br><span class="km">កញ្ចប់ប្រើអស់៖ «វគ្គបានប្រើរួច» = «វគ្គសរុប» (សល់ 0)។ មិនបញ្ចូលផលិតផលចាស់ ឬការមកម្តងៗទេ។</span></div>
 
     <section>
       <h2>Client <small class="km">អតិថិជន</small></h2>
@@ -98,8 +98,8 @@
   <div id="doneView" class="hidden ok">
     <div class="big">✅</div>
     <h1>Saved <span class="km">· បានរក្សាទុក</span></h1>
-    <p class="sub">It appears in Sessions Left within a minute. <span class="km">នឹងបង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់» ក្នុងមួយនាទី។</span></p>
-    <button type="button" id="again" class="btn primary">Next client · <span class="km">អតិថិជនបន្ទាប់</span></button>
+    <p class="sub">Open packages appear in Sessions Left within a minute; finished ones appear in the client's history (Client Profile). <span class="km">កញ្ចប់នៅសល់ បង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់»; កញ្ចប់ប្រើអស់ បង្ហាញក្នុងប្រវត្តិអតិថិជន។</span></p>
+    <button type="button" id="again" class="btn primary">Next package / client · <span class="km">កញ្ចប់ / អតិថិជនបន្ទាប់</span></button>
   </div>
 </main>
 <script>
@@ -121,14 +121,14 @@ $('review').onclick = () => {
   if (!$('pType').value) e.push('Package · កញ្ចប់');
   if (!(total > 0)) e.push('Total sessions · វគ្គព្យាបាលសរុប');
   if (used === '' || Number(used) < 0) e.push('Sessions already used · វគ្គព្យាបាលបានប្រើរួច');
-  else if (Number(used) >= total) e.push('No sessions left — do not enter · គ្មានវគ្គព្យាបាលនៅសល់ — កុំបញ្ចូល');
+  else if (Number(used) > total) e.push('Used is more than total · បានប្រើលើសវគ្គសរុប');
   if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   const d = new Date(); const today = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
   payload = { form: 'backfill', phone, name, date: today, enteredBy: $('enteredBy').value, packageType: $('pType').value, sessions: String(total), used,
     sharedWith: $('sharedWith').value.trim(), purchaseDate: $('pDate').value, receipt: $('receipt').value.trim(), price: $('price').value, note: $('note').value.trim() };
-  $('summary').innerHTML = `<b>${name}</b> · ${phone}<br>Entered by ${payload.enteredBy}<br><br>📁 <b>${payload.packageType}</b> · ${total} sessions · ${used} used · <b>${total - Number(used)} left</b>${payload.sharedWith ? '<br>Shared with: ' + payload.sharedWith : ''}<br>Receipt ${payload.receipt || 'OLD'}${payload.purchaseDate ? ' · bought ' + payload.purchaseDate : ''}${payload.price ? ' · $' + payload.price : ''}<div class="sub" style="margin-top:8px">Sessions left must match the paper folder. · ត្រូវតែដូចឯកសារក្រដាស។</div>`;
+  $('summary').innerHTML = `<b>${name}</b> · ${phone}<br>Entered by ${payload.enteredBy}<br><br>📁 <b>${payload.packageType}</b> · ${total} sessions · ${used} used · <b>${total - Number(used) === 0 ? '0 left · FINISHED · ប្រើអស់' : (total - Number(used)) + ' left'}</b>${payload.sharedWith ? '<br>Shared with: ' + payload.sharedWith : ''}<br>Receipt ${payload.receipt || 'OLD'}${payload.purchaseDate ? ' · bought ' + payload.purchaseDate : ''}${payload.price ? ' · $' + payload.price : ''}<div class="sub" style="margin-top:8px">Sessions left must match the paper folder. · ត្រូវតែដូចឯកសារក្រដាស។</div>`;
   show('confirmView'); window.scrollTo(0,0);
 };
 $('edit').onclick = () => show('formView');
