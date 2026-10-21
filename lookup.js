@@ -64,7 +64,8 @@
         if (j.found === 1) {
           if (!name.value.trim() || name.dataset.auto === '1') { name.value = j.name; name.dataset.auto = '1'; }
           var sh = j.master ? '<br>👥 Uses shared package of <b>' + String(j.master).replace(/</g, '&lt;') + '</b> · ' + (j.sharedLeft || 0) + ' left · ប្រើកញ្ចប់រួមរបស់អ្នកបង់' + ((j.sharedLeft || 0) <= 0 ? ' <span style="color:#C0392B">⚠ 0 left — sell a package</span>' : '') : '';
-          show('✓ Found in CRM: <b>' + j.name.replace(/</g, '&lt;') + '</b> · ' + j.left + ' sessions left · វគ្គព្យាបាលនៅសល់ ' + j.left + sh, '#2e7d4f');
+          var cr = (j.credit != null) ? '<br>💳 Homecare credit <b>$' + Number(j.credit).toFixed(2) + '</b>' + (j.creditDate ? ' (POS ' + j.creditDate + ')' : '') + ' · ក្រេឌីតនៅសល់' + (j.creditCheck === 'mismatch' ? ' <span style="color:#C0392B">⚠ check with Arifin</span>' : '') : '';
+          show('✓ Found in CRM: <b>' + j.name.replace(/</g, '&lt;') + '</b> · ' + j.left + ' sessions left · វគ្គព្យាបាលនៅសល់ ' + j.left + sh + cr, '#2e7d4f');
         } else if (j.found > 1) {
           show('More than one client has this phone — type the name. Arifin will check. · មានអតិថិជនច្រើននាក់ប្រើលេខនេះ — សូមវាយឈ្មោះ', '#C0392B');
         } else if (j.found === 0) {
@@ -99,7 +100,7 @@
           b.type = 'button';
           b.className = 'btn';
           b.style.cssText = 'display:block;width:100%;text-align:left;margin:4px 0;padding:8px 10px;font-weight:400';
-          b.textContent = it.name + ' · ' + it.phone + ' · ' + it.left + ' left' + (it.master ? ' · 👥 shared: ' + it.master + ' (' + (it.sharedLeft || 0) + ' left)' : '');
+          b.textContent = it.name + ' · ' + it.phone + ' · ' + it.left + ' left' + (it.master ? ' · 👥 shared: ' + it.master + ' (' + (it.sharedLeft || 0) + ' left)' : '') + (it.credit != null ? ' · 💳 $' + Number(it.credit).toFixed(2) : '');
           b.onclick = function () { phone.value = it.phone; name.value = it.name; name.dataset.auto = '1'; hideList(); last = ''; look(); };
           list.appendChild(b);
         });
