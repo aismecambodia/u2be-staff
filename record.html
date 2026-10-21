@@ -130,6 +130,42 @@
       </div>
     </section>
 
+    <section>
+      <label class="toggle"><input id="hasC" type="checkbox"> 💳 Homecare credit <span class="km">· ក្រេឌីតផលិតផលថែស្បែក</span></label>
+      <div id="cBox" class="hidden">
+        <p class="hint" id="cInfo">Homecare products only. Balance = the POS receipt. <span class="km">សម្រាប់ផលិតផលថែស្បែកប៉ុណ្ណោះ។</span></p>
+        <label>Buy credit today <span class="km">ទិញក្រេឌីតថ្ងៃនេះ</span></label>
+        <div class="radios" style="flex-wrap:wrap">
+          <label><input type="radio" name="topup" value="" checked> No · <span class="km">ទេ</span></label>
+          <label><input type="radio" name="topup" value="300|10"> $300 (+10%)</label>
+          <label><input type="radio" name="topup" value="500|15"> $500 (+15%)</label>
+        </div>
+        <p class="hint" id="topupCalc"></p>
+        <div id="topPayBox" class="hidden">
+          <label>Credit paid by * <span class="km">បង់ដោយ</span></label>
+          <select id="topPay"><option value="">—</option><option>Cash</option><option>QR</option></select>
+        </div>
+        <label class="toggle" style="margin-top:14px"><input id="payCredit" type="checkbox"> Products today paid with credit · <span class="km">ទូទាត់ផលិតផលដោយក្រេឌីត</span></label>
+        <div id="pcBox" class="hidden">
+          <p class="hint">No discount when paying with credit. Add the products above. <span class="km">គ្មានបញ្ចុះតម្លៃ។ បញ្ចូលផលិតផលខាងលើ។</span></p>
+          <label>Whose credit? <span class="km">ក្រេឌីតរបស់អ្នកណា?</span></label>
+          <div class="radios">
+            <label><input type="radio" name="cowner" value="self" checked> This client · <span class="km">អតិថិជននេះ</span></label>
+            <label><input type="radio" name="cowner" value="buyer"> Family (buyer's credit) · <span class="km">គ្រួសារ</span></label>
+          </div>
+          <div id="buyerBox" class="hidden">
+            <label>Buyer's phone * <span class="km">លេខទូរស័ព្ទអ្នកទិញក្រេឌីត</span></label>
+            <input id="buyerPhone" type="tel" inputmode="tel" autocomplete="off">
+            <label>Buyer's name <span class="km">ឈ្មោះអ្នកទិញ</span></label>
+            <input id="buyerName" type="text" autocomplete="off">
+            <label class="toggle" style="margin-top:10px"><input id="buyerOk" type="checkbox"> Buyer confirmed (call / Telegram) * · <span class="km">អ្នកទិញបានយល់ព្រម</span></label>
+          </div>
+        </div>
+        <label>Credit balance after — from the POS receipt * <span class="km">ក្រេឌីតនៅសល់ តាមវិក្កយបត្រ POS</span></label>
+        <input id="posBal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 185.00">
+      </div>
+    </section>
+
     <section id="saleBox" class="hidden">
       <h2>Receipt <small class="km">វិក្កយបត្រ</small></h2>
       <div class="row">
@@ -183,7 +219,8 @@ const LS = 'u2be_enteredBy';
 $('date').value = today();
 try { const v = localStorage.getItem(LS); if (v) $('enteredBy').value = v; } catch (e) {}
 const fromVal = () => (document.querySelector('input[name=from]:checked') || {}).value || 'Own';
-const syncSale = () => $('saleBox').classList.toggle('hidden', !($('hasB').checked || $('hasP').checked));
+const topVal = () => (document.querySelector('input[name=topup]:checked') || {}).value || '';
+const syncSale = () => $('saleBox').classList.toggle('hidden', !($('hasB').checked || $('hasP').checked || ($('hasC').checked && topVal())));
 $('tType').onchange = () => $('fromBox').classList.toggle('hidden', $('tType').value === 'none');
 document.querySelectorAll('input[name=from]').forEach(r => r.onchange = () => $('payerBox').classList.toggle('hidden', fromVal() !== 'Shared'));
 const forVal = () => (document.querySelector('input[name=bfor]:checked') || {}).value || 'own';
@@ -208,6 +245,21 @@ document.addEventListener('u2be:client', (ev) => {
 });
 $('hasB').onchange = () => { $('bBox').classList.toggle('hidden', !$('hasB').checked); syncSale(); };
 $('hasP').onchange = () => { $('pBox').classList.toggle('hidden', !$('hasP').checked); if ($('hasP').checked && !$('items').children.length) addItem(); syncSale(); };
+const ownerVal = () => (document.querySelector('input[name=cowner]:checked') || {}).value || 'self';
+const lockDisc = () => {
+  const on = $('hasC').checked && $('payCredit').checked;
+  document.querySelectorAll('#items .item').forEach((it) => { const t = it.querySelector('.dtype'), a = it.querySelector('.damt');
+    if (on) { t.value = 'None'; a.value = ''; } t.disabled = on; a.disabled = on; });
+};
+$('hasC').onchange = () => { $('cBox').classList.toggle('hidden', !$('hasC').checked); lockDisc(); syncSale(); };
+document.querySelectorAll('input[name=topup]').forEach((r) => r.onchange = () => {
+  const v = topVal(); $('topPayBox').classList.toggle('hidden', !v);
+  if (v) { const [p, b] = v.split('|').map(Number); $('topupCalc').innerHTML = `Paid $${p} + bonus ${b}% ($${(p * b / 100).toFixed(2)}) = <b>credit $${(p + p * b / 100).toFixed(2)}</b> · <span class="km">ក្រេឌីតសរុប</span>`; }
+  else $('topupCalc').textContent = '';
+  syncSale();
+});
+$('payCredit').onchange = () => { $('pcBox').classList.toggle('hidden', !$('payCredit').checked); lockDisc(); };
+document.querySelectorAll('input[name=cowner]').forEach((r) => r.onchange = () => $('buyerBox').classList.toggle('hidden', ownerVal() !== 'buyer'));
 $('pType').onchange = () => { const m = SIZES[$('pType').value]; if (m) $('sessions').value = m; else { $('sessions').value = ''; $('sessions').focus(); } };
 const bDisc = () => autoDiscount($('disc'), $('discAmt'), () => Number($('price').value) || 0);
 $('disc').addEventListener('change', bDisc);
@@ -246,6 +298,7 @@ function addItem() {
   div.querySelector('.rm').onclick = () => { div.remove(); $('addItem').classList.remove('hidden'); };
   $('items').appendChild(div);
   $('addItem').classList.toggle('hidden', $('items').children.length >= 10);
+  lockDisc();
 }
 $('addItem').onclick = addItem;
 
@@ -282,7 +335,23 @@ $('review').onclick = () => {
       products.push(p);
     });
   }
-  const selling = !!bought || products.length > 0;
+  let credit = null;
+  if ($('hasC').checked) {
+    const tv = topVal(), pc = $('payCredit').checked;
+    if (!tv && !pc) e.push('Credit: choose Buy credit or Products paid with credit · ក្រេឌីត');
+    if (tv && !$('topPay').value) e.push('Credit paid by · បង់ដោយ');
+    if (pc && !products.length) e.push('Credit: add the products (Products bought today) · បញ្ចូលផលិតផល');
+    if (pc && ownerVal() === 'buyer') {
+      if ($('buyerPhone').value.replace(/[^0-9]/g,'').length < 8) e.push("Buyer's phone · លេខអ្នកទិញ");
+      if (!$('buyerOk').checked) e.push('Buyer confirmed · អ្នកទិញយល់ព្រម');
+    }
+    if ($('posBal').value === '') e.push('Credit balance after (POS receipt) · ក្រេឌីតនៅសល់');
+    const [tp, tb] = tv ? tv.split('|').map(Number) : [0, 0];
+    credit = { topup: tv ? { paid: tp, bonusPct: tb, payment: $('topPay').value } : null, payWithCredit: pc,
+      owner: pc ? ownerVal() : 'self', buyerPhone: $('buyerPhone').value.trim(), buyerName: $('buyerName').value.trim(),
+      buyerConfirmed: $('buyerOk').checked, posBalance: $('posBal').value };
+  }
+  const selling = !!bought || products.length > 0 || !!(credit && credit.topup);
   const receipt = $('receipt').value.trim();
   if (selling && !receipt) e.push('POS receipt · វិក្កយបត្រ');
   if (selling && !$('closedBy').value) e.push('Closed by · អ្នកលក់');
@@ -292,7 +361,9 @@ $('review').onclick = () => {
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   payload = { form: 'record', phone, name, date: $('date').value, enteredBy: $('enteredBy').value,
     today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '' },
-    bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '', payment: selling ? $('payment').value : '' };
+    bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
+    payment: selling ? (credit && credit.payWithCredit ? 'Homecare Credit' : $('payment').value) : '', credit,
+    k: (() => { try { return localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
   html += payload.today ? `<br>🩺 <b>${tt}</b> · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
@@ -304,6 +375,13 @@ $('review').onclick = () => {
     const t = Number(p.qty) * Number(p.unitPrice) - (Number(p.discountAmount) || 0); total += t;
     html += `<br>🧴 <b>${p.product === 'Other' ? p.other : p.product}</b> × ${p.qty} @ ${money(p.unitPrice)}${Number(p.discountAmount) ? ' − ' + money(p.discountAmount) : ''} = <b>${money(t)}</b>`;
   });
+  if (credit) {
+    if (credit.topup) { const c = credit.topup.paid * (1 + credit.topup.bonusPct / 100); total += credit.topup.paid;
+      html += `<br>💳 <b>Buy credit</b> ${money(credit.topup.paid)} + ${credit.topup.bonusPct}% = <b>${money(c)} credit</b> · paid ${credit.topup.payment}<br>`; }
+    if (credit.payWithCredit) { const sp = products.reduce((a, p) => a + Number(p.qty) * Number(p.unitPrice), 0); total -= sp;
+      html += `<br>💳 Products paid with credit: <b>−${money(sp)}</b> from ${credit.owner === 'buyer' ? 'buyer ' + (credit.buyerName || credit.buyerPhone) + (credit.buyerConfirmed ? ' ✅ confirmed' : '') : 'this client'}<br>`; }
+    html += `💳 Credit balance after (POS): <b>${money(credit.posBalance)}</b><br>`;
+  }
   if (selling) html += `<br>Receipt <b>${receipt}</b> · Closed by ${payload.closedBy}${payload.payment ? ' · ' + payload.payment : ''}<div class="total">Total today · សរុបថ្ងៃនេះ ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
   $('summary').innerHTML = html;
   show('confirmView'); window.scrollTo(0,0);
@@ -326,9 +404,12 @@ $('again').onclick = () => {
   document.querySelector('input[name=bfor][value=own]').checked = true; $('bSharedBox').classList.add('hidden');
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
+  $('hasC').checked = false; $('payCredit').checked = false; $('buyerOk').checked = false; ['cBox','pcBox','buyerBox','topPayBox'].forEach(id => $(id).classList.add('hidden'));
+  ['buyerPhone','buyerName','posBal','topPay'].forEach(id => $(id).value = ''); $('topupCalc').textContent = '';
+  document.querySelector('input[name=topup][value=""]').checked = true; document.querySelector('input[name=cowner][value=self]').checked = true; lockDisc();
   show('formView'); window.scrollTo(0,0);
 };
 </script>
-<script src="./lookup.js?v=6"></script>
+<script src="./lookup.js?v=7"></script>
 </body>
 </html>

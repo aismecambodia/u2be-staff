@@ -65,6 +65,17 @@
     <button type="button" id="addPkg" class="btn ghost">+ Add another package · <span class="km">បន្ថែមកញ្ចប់</span></button>
     <div style="height:14px"></div>
 
+    <section>
+      <label class="toggle"><input id="hasC" type="checkbox"> 💳 Homecare credit balance today (from POS) · <span class="km">ក្រេឌីតនៅសល់ (ពី POS)</span></label>
+      <div id="cBox" class="hidden">
+        <p class="hint">Only if the client has prepaid homecare credit left. Type the balance shown in the POS today. Client with credit but no package: leave the package blank. <span class="km">បើអតិថិជនមានក្រេឌីតនៅសល់។ វាយចំនួនក្នុង POS ថ្ងៃនេះ។</span></p>
+        <label>Credit balance $ * <span class="km">ក្រេឌីតនៅសល់</span></label>
+        <input id="cBal" type="number" min="0" step="0.01" inputmode="decimal" placeholder="e.g. 185.00">
+        <label>Note <span class="km">កំណត់ចំណាំ</span></label>
+        <input id="cNote" type="text" placeholder="optional, e.g. bought $500 on 2 Sep" autocomplete="off">
+      </div>
+    </section>
+
     <div id="err" class="err"></div>
     <button type="button" id="review" class="btn primary">Review · <span class="km">ពិនិត្យ</span></button>
   </div>
@@ -123,6 +134,8 @@ const LS = 'u2be_enteredBy';
 try { const v = localStorage.getItem(LS); if (v) $('enteredBy').value = v; } catch (e) {}
 
 const blocks = () => [...document.querySelectorAll('#pkgs .pkg')];
+$('hasC').onchange = () => $('cBox').classList.toggle('hidden', !$('hasC').checked);
+const isBlank = (el) => !el.querySelector('.pType').value && !el.querySelector('.sessions').value && el.querySelector('.used').value === '';
 function renumber() {
   const b = blocks();
   b.forEach((el, i) => { el.querySelector('.n').textContent = i + 1; el.querySelector('.rm').classList.toggle('hidden', b.length === 1); });
@@ -150,8 +163,11 @@ $('review').onclick = () => {
   if (!name) e.push('Name · ឈ្មោះ');
   if (!$('enteredBy').value) e.push('Entered by · អ្នកបញ្ចូល');
   const packages = [];
+  const credit = $('hasC').checked ? { opening: $('cBal').value, note: $('cNote').value.trim() } : null;
+  if (credit && credit.opening === '') e.push('Credit balance · ក្រេឌីតនៅសល់');
   blocks().forEach((el, i) => {
     const q = (c) => el.querySelector(c);
+    if (credit && isBlank(el)) return;
     const n = i + 1, total = Number(q('.sessions').value), used = q('.used').value;
     if (!q('.pType').value) e.push(`Package ${n}: package · កញ្ចប់`);
     if (!(total > 0)) e.push(`Package ${n}: total sessions · វគ្គសរុប`);
@@ -162,11 +178,13 @@ $('review').onclick = () => {
       sharedWith: q('.shared').checked ? q('.sharedWith').value.trim() : '', purchaseDate: q('.pDate').value,
       receipt: q('.receipt').value.trim(), price: q('.price').value, note: q('.note').value.trim() });
   });
+  if (!packages.length && !credit) e.push('At least one package or the credit balance · កញ្ចប់ ឬក្រេឌីត');
   if (e.length) { $('err').innerHTML = 'Please fill: ' + e.map(esc).join(', '); return; }
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   const d = new Date(); const today = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
-  payload = { form: 'backfill', phone, name, date: today, enteredBy: $('enteredBy').value, packages };
+  payload = { form: 'backfill', phone, name, date: today, enteredBy: $('enteredBy').value, packages, credit,
+    k: (() => { try { return localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return ''; } })() };
   let html = `<b>${esc(name)}</b> · ${esc(phone)}<br>Entered by ${esc(payload.enteredBy)}<br>`;
   packages.forEach((p, i) => {
     const left = Number(p.sessions) - Number(p.used);
@@ -174,6 +192,7 @@ $('review').onclick = () => {
       + (p.shared ? `<br>👥 SHARED with: ${esc(p.sharedWith)}` : '')
       + `<br><span style="color:#6b6b6b">Receipt ${esc(p.receipt || 'OLD')}${p.purchaseDate ? ' · bought ' + p.purchaseDate : ''}${p.price ? ' · $' + esc(p.price) : ''}${p.note ? ' · ' + esc(p.note) : ''}</span><br>`;
   });
+  if (credit) html += `<br>💳 <b>Homecare credit balance (POS): $${Number(credit.opening).toFixed(2)}</b>${credit.note ? ' · ' + esc(credit.note) : ''}<br>`;
   html += `<div class="sub" style="margin-top:8px">${packages.length} package(s) · numbers must match the paper folder. · ត្រូវតែដូចឯកសារក្រដាស។</div>`;
   $('summary').innerHTML = html;
   show('confirmView'); window.scrollTo(0,0);
@@ -184,13 +203,13 @@ $('send').onclick = async () => {
   try {
     await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) });
     const n = payload.packages.length, sh = payload.packages.some(p => p.shared);
-    $('doneMsg').innerHTML = `${n} package(s) saved. Open ones appear in Sessions Left within a minute; finished ones in the client's history.${sh ? ' Shared package: Arifin will link each user as a sub-client.' : ''} <span class="km">កញ្ចប់នៅសល់ បង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់»; កញ្ចប់ប្រើអស់ បង្ហាញក្នុងប្រវត្តិអតិថិជន។</span>`;
+    $('doneMsg').innerHTML = `${n} package(s) saved.${payload.credit ? ' Credit balance saved.' : ''} Open ones appear in Sessions Left within a minute; finished ones in the client's history.${sh ? ' Shared package: Arifin will link each user as a sub-client.' : ''} <span class="km">កញ្ចប់នៅសល់ បង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់»; កញ្ចប់ប្រើអស់ បង្ហាញក្នុងប្រវត្តិអតិថិជន។</span>`;
     show('doneView'); window.scrollTo(0,0);
   } catch (err) { alert('Not sent — check the internet and try again. / មិនទាន់ផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
   b.disabled = false; b.innerHTML = 'Send · <span class="km">ផ្ញើ</span>';
 };
-$('again').onclick = () => { $('phone').value = ''; $('name').value = ''; $('pkgs').innerHTML = ''; addPkg(); payload = null; show('formView'); window.scrollTo(0,0); };
+$('again').onclick = () => { $('phone').value = ''; $('name').value = ''; $('hasC').checked = false; $('cBox').classList.add('hidden'); $('cBal').value = ''; $('cNote').value = ''; $('pkgs').innerHTML = ''; addPkg(); payload = null; show('formView'); window.scrollTo(0,0); };
 </script>
-<script src="./lookup.js?v=6"></script>
+<script src="./lookup.js?v=7"></script>
 </body>
 </html>
