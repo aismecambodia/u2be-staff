@@ -48,7 +48,7 @@
   <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
   <div id="formView">
     <h1>Backfill (POS&gt;CRM) <span class="km">· បញ្ចូលទិន្នន័យចាស់</span></h1>
-    <p class="sub">Every package or single session bought before 14 Oct 2026 (paper folder / POS) — unfinished AND finished. One form per client: add all their packages, then Send once. <span class="km">កញ្ចប់ទាំងអស់ពីឯកសារក្រដាស — ទាំងនៅសល់ និងប្រើអស់។ មួយទម្រង់ក្នុងមួយអតិថិជន — បន្ថែមកញ្ចប់ទាំងអស់ ហើយផ្ញើម្តង។</span></p>
+    <p class="sub">Every package or single session bought before 14 Oct 2026 (paper folder / POS) — unfinished AND finished. One form per client: add all their packages, then Submit once. <span class="km">កញ្ចប់ទាំងអស់ពីឯកសារក្រដាស — ទាំងនៅសល់ និងប្រើអស់។ មួយទម្រង់ក្នុងមួយអតិថិជន — បន្ថែមកញ្ចប់ទាំងអស់ ហើយបញ្ជូនម្តង។</span></p>
     <div class="warn">Finished package: "Sessions already used" = Total sessions (0 left). Shared package: enter it under the PAYER and tick "Shared package". Old products and each past visit are NOT entered.<br><span class="km">កញ្ចប់ប្រើអស់៖ «វគ្គបានប្រើរួច» = «វគ្គសរុប»។ កញ្ចប់ប្រើរួម៖ បញ្ចូលក្រោមឈ្មោះអ្នកបង់ ហើយធីក «កញ្ចប់ប្រើរួម»។</span></div>
 
     <section>
@@ -81,9 +81,9 @@
   </div>
 
   <div id="confirmView" class="hidden">
-    <h1>Check before sending <span class="km">· ពិនិត្យមុនផ្ញើ</span></h1>
+    <h1>Check before submitting <span class="km">· ពិនិត្យមុនបញ្ជូន</span></h1>
     <section><div id="summary" class="sum"></div></section>
-    <button type="button" id="send" class="btn primary">Send · <span class="km">ផ្ញើ</span></button>
+    <button type="button" id="send" class="btn primary">Submit · <span class="km">បញ្ជូន</span></button>
     <div style="height:10px"></div>
     <button type="button" id="edit" class="btn ghost">‹ Edit · <span class="km">កែប្រែ</span></button>
   </div>
@@ -199,17 +199,17 @@ $('review').onclick = () => {
 };
 $('edit').onclick = () => show('formView');
 $('send').onclick = async () => {
-  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Sending…';
+  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Submitting…';
   try {
     await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) });
     const n = payload.packages.length, sh = payload.packages.some(p => p.shared);
     $('doneMsg').innerHTML = `${n} package(s) saved.${payload.credit ? ' Credit balance saved.' : ''} Open ones appear in Sessions Left within a minute; finished ones in the client's history.${sh ? ' Shared package: Arifin will link each user as a sub-client.' : ''} <span class="km">កញ្ចប់នៅសល់ បង្ហាញក្នុង «វគ្គព្យាបាលនៅសល់»; កញ្ចប់ប្រើអស់ បង្ហាញក្នុងប្រវត្តិអតិថិជន។</span>`;
     show('doneView'); window.scrollTo(0,0);
-  } catch (err) { alert('Not sent — check the internet and try again. / មិនទាន់ផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
-  b.disabled = false; b.innerHTML = 'Send · <span class="km">ផ្ញើ</span>';
+  } catch (err) { alert('Not submitted — check the internet and try again. / មិនទាន់បញ្ជូន — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
+  b.disabled = false; b.innerHTML = 'Submit · <span class="km">បញ្ជូន</span>';
 };
 $('again').onclick = () => { $('phone').value = ''; $('name').value = ''; $('hasC').checked = false; $('cBox').classList.add('hidden'); $('cBal').value = ''; $('cNote').value = ''; $('pkgs').innerHTML = ''; addPkg(); payload = null; show('formView'); window.scrollTo(0,0); };
 </script>
-<script src="./lookup.js?v=8"></script>
+<script src="./lookup.js?v=9"></script>
 </body>
 </html>

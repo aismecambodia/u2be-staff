@@ -54,7 +54,7 @@
   <div id="formView">
     <h1>Client Record <span class="km">· កំណត់ត្រាអតិថិជន</span></h1>
     <p class="sub">One record for every client visit, after the POS. <span class="km">កំណត់ត្រាមួយ សម្រាប់ការមកម្តងៗ បន្ទាប់ពី POS។</span></p>
-    <div class="warn">Send once only. Made a mistake? Tell Arifin — do not send again.<br><span class="km">ផ្ញើតែម្តង។ បើខុស សូមប្រាប់ Arifin — កុំផ្ញើម្តងទៀត។</span></div>
+    <div class="warn">Submit once only. Made a mistake? Tell Arifin — do not submit again.<br><span class="km">បញ្ជូនតែម្តង។ បើខុស សូមប្រាប់ Arifin — កុំបញ្ជូនម្តងទៀត។</span></div>
 
     <section>
       <h2>Client <small class="km">អតិថិជន</small></h2>
@@ -118,7 +118,7 @@
         </div>
         <label>Note <span class="km">កំណត់ចំណាំ</span></label>
         <input id="bNote" type="text" placeholder="optional">
-        <p class="hint">Client still has sessions left? Send anyway — Arifin adds them to her balance. <span class="km">នៅសល់វគ្គ? ផ្ញើដដែល — Arifin បូកបញ្ចូល។</span></p>
+        <p class="hint">Client still has sessions left? Submit anyway — Arifin adds them to her balance. <span class="km">នៅសល់វគ្គ? បញ្ជូនដដែល — Arifin បូកបញ្ចូល។</span></p>
       </div>
     </section>
 
@@ -183,9 +183,9 @@
   </div>
 
   <div id="confirmView" class="hidden">
-    <h1>Check before sending <span class="km">· ពិនិត្យមុនផ្ញើ</span></h1>
+    <h1>Check before submitting <span class="km">· ពិនិត្យមុនបញ្ជូន</span></h1>
     <section><div id="summary" class="sum"></div></section>
-    <button type="button" id="send" class="btn primary">Send · <span class="km">ផ្ញើ</span></button>
+    <button type="button" id="send" class="btn primary">Submit · <span class="km">បញ្ជូន</span></button>
     <div style="height:10px"></div>
     <button type="button" id="edit" class="btn ghost">‹ Edit · <span class="km">កែប្រែ</span></button>
   </div>
@@ -355,7 +355,7 @@ $('review').onclick = () => {
   const receipt = $('receipt').value.trim();
   if (selling && !receipt) e.push('POS receipt · វិក្កយបត្រ');
   if (selling && !$('closedBy').value) e.push('Closed by · អ្នកលក់');
-  if (tt === 'none' && !selling) e.push('Nothing to send: no treatment and nothing bought · គ្មានអ្វីត្រូវផ្ញើ');
+  if (tt === 'none' && !selling) e.push('Nothing to submit: no treatment and nothing bought · គ្មានអ្វីត្រូវបញ្ជូន');
   if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
@@ -388,12 +388,12 @@ $('review').onclick = () => {
 };
 $('edit').onclick = () => show('formView');
 $('send').onclick = async () => {
-  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Sending…';
+  const b = $('send'); if (b.disabled) return; b.disabled = true; b.textContent = 'Submitting…';
   try {
     await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) });
     show('doneView'); window.scrollTo(0,0);
-  } catch (err) { alert('Not sent — check the internet and try again. / មិនទាន់ផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
-  b.disabled = false; b.innerHTML = 'Send · <span class="km">ផ្ញើ</span>';
+  } catch (err) { alert('Not submitted — check the internet and try again. / មិនទាន់បញ្ជូន — សូមពិនិត្យអ៊ីនធឺណិត ហើយព្យាយាមម្តងទៀត។'); }
+  b.disabled = false; b.innerHTML = 'Submit · <span class="km">បញ្ជូន</span>';
 };
 $('again').onclick = () => {
   ['phone','name','payer','sessions','price','discAmt','sharedWith','bNote','receipt'].forEach(id => $(id).value = '');
@@ -410,6 +410,6 @@ $('again').onclick = () => {
   show('formView'); window.scrollTo(0,0);
 };
 </script>
-<script src="./lookup.js?v=8"></script>
+<script src="./lookup.js?v=9"></script>
 </body>
 </html>
