@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Lotus Demo Clinic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Khmer:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme:light;
+  --accent:#2F7A78; --ink:#205B59; --soft:#E1EFED;
+  --gold:#D9A441; --goldSoft:#F6ECD3; --goldInk:#6E4E0F;
+  --ground:#F5F7F7; --surface:#FFFFFF; --text:#1E2A30; --muted:#55616A; --line:#E0E6E8;
+  --warnBg:#FFF0D9; --warn:#8A4B00; --grayBg:#EEF1F4; --gray:#3D4852;
+  --r:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,'Noto Sans Khmer',system-ui,sans-serif;background:var(--ground);color:var(--text);font-size:15px;line-height:1.45}
+a{color:inherit;text-decoration:none}
+button,input,select{font:inherit;color:inherit}
+svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.grow{flex:1 1 20px}
+small{font-size:12px}
+
+/* Header */
+.top{display:flex;flex-wrap:wrap;align-items:center;gap:14px;padding:12px 24px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.brand{display:flex;align-items:center;gap:12px}
+.mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.brand-text{display:flex;flex-direction:column;line-height:1.25}
+.brand-text small,.who small{color:var(--muted)}
+.demo-badge{font-size:11px;font-weight:700;letter-spacing:.08em;padding:4px 8px;border-radius:6px;background:var(--goldSoft);color:var(--goldInk)}
+.search{display:flex;align-items:center;gap:8px;padding:0 12px;height:42px;min-width:260px;border:1px solid var(--line);border-radius:10px;background:var(--ground);color:var(--muted)}
+.search input{border:0;background:transparent;outline:none;width:100%;color:var(--text)}
+.search:focus-within{border-color:var(--ink)}
+.who{display:flex;align-items:center;gap:10px;font-size:13px}
+.who>span:last-child{display:flex;flex-direction:column;line-height:1.3}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--ink);display:flex;align-items:center;justify-content:center;font-weight:700;flex:none}
+
+/* Shell */
+.shell{display:flex;min-height:calc(100vh - 66px)}
+.side{width:232px;flex:none;padding:18px 14px;background:var(--surface);border-right:1px solid var(--line);display:flex;flex-direction:column;gap:4px}
+.side a{display:flex;align-items:center;gap:12px;min-height:44px;padding:0 12px;border-radius:10px;color:var(--muted);font-size:14px}
+.side a small{font-size:13px}
+.side a:hover{background:var(--ground)}
+.side a.on{background:var(--soft);color:var(--ink);font-weight:600}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding:12px;border-radius:10px;background:var(--ground);font-size:12px;color:var(--muted)}
+.side-foot p{margin:0}
+main{flex:1;min-width:0;padding:26px 28px 40px;display:flex;flex-direction:column;gap:20px;outline:none}
+
+/* Common */
+h1{margin:0;font-size:28px;font-weight:700;letter-spacing:-.01em}
+h2{margin:0;font-size:16px;font-weight:600}
+.sub{margin:4px 0 0;color:var(--muted)}
+.head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px}
+.head>div:first-child{flex:1 1 300px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px}
+.card.flush{padding:0;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--line)}
+.card-h h2{flex:1}
+.cols{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.c2{flex:2 1 480px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.c1{flex:1 1 290px;min-width:0;display:flex;flex-direction:column;gap:18px}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;align-items:center;gap:10px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--ink)}
+.btn.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary:hover{background:#174645}
+.btn.small{min-height:36px;padding:0 12px;font-size:13px}
+.btn.ghost{background:transparent}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.pill svg{width:14px;height:14px;stroke-width:2.5}
+.p-ok{background:var(--goldSoft);color:var(--goldInk)}
+.p-cf{background:var(--soft);color:var(--ink)}
+.p-wait{background:var(--grayBg);color:var(--gray)}
+.p-warn{background:var(--warnBg);color:var(--warn)}
+.bar{height:6px;border-radius:3px;background:var(--line)}
+.bar>i{display:block;height:100%;border-radius:3px;background:var(--gold)}
+.bar.thick{height:9px}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--accent);border-radius:var(--r);padding:14px 18px;display:flex;flex-direction:column;gap:4px}
+.kpi b{font-size:30px;font-weight:700;line-height:1.15}
+.kpi span{font-size:13px;color:var(--muted)}
+.kpi small{color:var(--muted)}
+.kpi.t2{border-top-color:var(--gold)} .kpi.t3{border-top-color:var(--ink)} .kpi.t4{border-top-color:#D9922E}
+.up{color:#3F6B2E!important}
+
+/* Schedule */
+.sched-row{display:grid;grid-template-columns:62px minmax(150px,2fr) minmax(110px,1.3fr) minmax(110px,1.2fr) 150px 128px;gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)}
+.sched-row:last-child{border-bottom:0}
+.sched-row .who-cell{display:flex;flex-direction:column;min-width:0}
+.sched-row .who-cell b:hover{text-decoration:underline}
+.sched-act{justify-self:end}
+.list-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.list-item:first-of-type{border-top:0}
+.list-item>div{flex:1;display:flex;flex-direction:column;min-width:0}
+.dot{width:8px;height:8px;border-radius:50%;margin-top:7px;flex:none}
+.alert{display:flex;gap:10px;font-size:14px}
+
+/* Clients */
+.table{width:100%;border-collapse:collapse;font-size:14px}
+.table th{text-align:left;font-size:12px;font-weight:600;color:var(--muted);padding:10px 20px;border-bottom:1px solid var(--line)}
+.table td{padding:12px 20px;border-bottom:1px solid var(--line)}
+.table tr:last-child td{border-bottom:0}
+.table tbody tr{cursor:pointer}
+.table tbody tr:hover td{background:var(--ground)}
+.scroll{overflow-x:auto}
+
+/* Profile */
+.hero{display:flex;flex-wrap:wrap;align-items:center;gap:18px}
+.hero .avatar{width:64px;height:64px;font-size:22px}
+.hero-main{flex:1 1 280px;display:flex;flex-direction:column;gap:8px}
+.meta{display:flex;flex-wrap:wrap;gap:14px;color:var(--muted);font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.pkg{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border:1px solid var(--line);border-radius:12px}
+.pkg-top{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.pkg-top b{flex:1}
+.big{font-size:36px;font-weight:700;color:var(--ink)}
+.ledger{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}
+.ledger span:nth-child(2){flex:1}
+.visit{display:grid;grid-template-columns:100px minmax(0,1fr) auto;gap:14px;padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+
+/* Sell */
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.opt{text-align:left;min-height:66px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);cursor:pointer}
+.opt b{display:block;font-size:15px}
+.opt small{display:block;margin-top:3px;color:var(--muted)}
+.opt.on{border:2px solid var(--ink);background:var(--soft);color:var(--ink);padding:11px 13px}
+.opt.on small{color:var(--ink)}
+.opt[disabled]{opacity:.45;cursor:not-allowed}
+.field{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--muted)}
+.field select,.field input{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px;color:var(--text)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.line-item{display:grid;grid-template-columns:minmax(0,1fr) 110px 90px 36px;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line);font-size:14px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button,.x{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font-weight:700}
+.switch{display:flex;align-items:center;gap:12px;min-height:54px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--ground);cursor:pointer;text-align:left;width:100%}
+.switch .trk{width:42px;height:24px;border-radius:12px;background:#B8C0C6;position:relative;flex:none;transition:background .15s}
+.switch .trk::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .15s}
+.switch[aria-pressed="true"] .trk{background:var(--ink)}
+.switch[aria-pressed="true"] .trk::after{left:21px}
+.switch[disabled]{opacity:.5;cursor:not-allowed}
+.sum-line{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.sum-line span:first-child{flex:1;color:var(--muted)}
+.sum-line span:last-child{font-weight:600;text-align:right}
+.total{display:flex;align-items:baseline;gap:10px;padding-top:4px}
+.total span:first-child{flex:1;font-weight:600}
+.total b{font-size:28px;color:var(--ink)}
+.credit-box{display:flex;gap:10px;padding:10px 12px;border-radius:10px;background:var(--goldSoft);color:var(--goldInk);font-size:14px}
+.credit-box span:first-child{flex:1}
+.warnbox{padding:10px 12px;border-radius:10px;background:var(--warnBg);color:var(--warn);font-size:13px}
+.sticky{position:sticky;top:86px}
+
+/* Dashboard */
+.seg{display:flex;padding:4px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.seg button{min-height:38px;padding:0 16px;border:0;border-radius:9px;background:transparent;color:var(--muted);font-weight:600;cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.chart{display:flex;align-items:flex-end;gap:14px;height:210px;padding-top:10px;border-bottom:1px solid var(--line)}
+.chart .col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.chart .col i{display:block;width:100%;max-width:48px;border-radius:6px 6px 0 0;background:var(--gold)}
+.chart .col.now i{background:var(--accent)}
+.chart-x{display:flex;gap:14px}
+.chart-x span{flex:1;text-align:center;font-size:12px;color:var(--muted)}
+.mix{display:flex;flex-direction:column;gap:6px}
+.mix .row span:first-child{flex:1}
+.lists{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.li{display:flex;flex-direction:column;gap:2px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+.li small{color:var(--muted)}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+
+/* Toast */
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:var(--text);color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;pointer-events:none;transition:all .2s;z-index:20;max-width:90vw}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Phone / counter */
+@media (max-width:760px){
+  body{font-size:15px;padding-bottom:76px}
+  .top{padding:10px 16px;gap:10px}
+  .brand-text small,.who{display:none}
+  .demo-badge{font-size:10px}
+  .search{order:5;flex:1 1 100%;min-width:0}
+  .shell{display:block;min-height:0}
+  .side{position:fixed;left:0;right:0;bottom:0;width:auto;flex-direction:row;padding:6px max(6px, env(safe-area-inset-right,0px)) calc(14px + env(safe-area-inset-bottom,0px)) max(6px, env(safe-area-inset-left,0px));border-right:0;border-top:1px solid var(--line);z-index:10;gap:0}
+  .side a{flex:1;flex-direction:column;gap:3px;min-height:52px;padding:4px 2px;font-size:11px;justify-content:center;text-align:center}
+  .side a small,.side-foot{display:none}
+  .side svg{width:20px;height:20px}
+  main{padding:16px 16px 24px;gap:14px}
+  h1{font-size:23px}
+  .sched-row{grid-template-columns:52px minmax(0,1fr) auto;grid-template-areas:"t w s" "t tr a";padding:12px 14px;row-gap:6px}
+  .sched-row>.t{grid-area:t}.sched-row>.who-cell{grid-area:w}.sched-row>.tr{grid-area:tr}.sched-row>.pg{display:none}.sched-row>.st{grid-area:s;justify-self:end}.sched-row>.sched-act{grid-area:a}
+  .kpi b{font-size:24px}
+  .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .sticky{position:static}
+  .table .hide-m{display:none}
+  .table td,.table th{padding:10px 14px}
+}
+[hidden]{display:none!important}
+
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <a class="brand" href="#today">
+    <span class="mark">LD</span>
+    <span class="brand-text"><b>Lotus Demo Clinic</b><small>គ្លីនិកសាកល្បង Lotus</small></span>
+  </a>
+  <span class="demo-badge">DEMO · SAMPLE DATA</span>
+  <span class="grow"></span>
+  <form class="search" id="topSearch" role="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <label class="sr" for="q">Search client</label>
+    <input id="q" type="search" placeholder="Name, phone or file ID · ស្វែងរក" autocomplete="off">
+  </form>
+  <div class="who"><span class="avatar">FD</span><span><b>Front Desk</b><small id="todayLabel"></small></span></div>
+</header>
+<div class="shell">
+  <nav class="side" aria-label="Main">
+    <a href="#today" data-nav="today"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span>Today<small> · ថ្ងៃនេះ</small></span></a>
+    <a href="#clients" data-nav="clients"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11a3 3 0 100-6M22 21c0-3-2-5-5-5.5"/></svg><span>Clients<small> · អតិថិជន</small></span></a>
+    <a href="#sell" data-nav="sell"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h2l2.5 11h10L21 7H7"/><circle cx="10" cy="20" r="1.5"/><circle cx="17" cy="20" r="1.5"/></svg><span>Sell / Record<small> · លក់</small></span></a>
+    <a href="#dashboard" data-nav="dashboard"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>Dashboard<small> · ផ្ទាំងគ្រប់គ្រង</small></span></a>
+    <div class="side-foot">
+      <p>Nana assistant is online. Booking alerts arrive in about 2 minutes.</p>
+      <button type="button" class="btn ghost small" id="resetBtn">Reset demo data</button>
+    </div>
+  </nav>
+  <main id="main" tabindex="-1"></main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script>
+/* Lotus Demo Clinic — sample-data demo app. All data lives in this browser only. */
+(function () {
+  'use strict';
+
+  var KEY = 'lotus-demo-v1';
+  var DAY = 864e5;
+  var TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+
+  var PRODUCTS = [
+    { id: 'p1', name: 'Vitamin C Serum 30ml', price: 45 },
+    { id: 'p2', name: 'Sunscreen SPF 50', price: 31 },
+    { id: 'p3', name: 'Hydrating Toner', price: 28 },
+    { id: 'p4', name: 'Night Repair Cream', price: 52 },
+    { id: 'p5', name: 'Gentle Cleanser', price: 22 }
+  ];
+  var PACKAGES = [
+    { id: 'k1', name: 'HydraFacial', sessions: 10, price: 650 },
+    { id: 'k2', name: 'Laser Toning', sessions: 5, price: 400 },
+    { id: 'k3', name: 'Acne Clear', sessions: 10, price: 550 },
+    { id: 'k4', name: 'Whitening Drip', sessions: 6, price: 480 }
+  ];
+  var TOPUPS = [
+    { id: 'none', title: 'No top-up', sub: 'Skip', paid: 0, credit: 0 },
+    { id: '300', title: '$300 → $330', sub: '+$30 bonus (10%)', paid: 300, credit: 330 },
+    { id: '500', title: '$500 → $575', sub: '+$75 bonus (15%)', paid: 500, credit: 575 }
+  ];
+  var STAFF = ['Therapist A', 'Therapist B', 'Specialist 1', 'Front Desk'];
+  var METHODS = ['ABA transfer', 'Cash', 'Card'];
+
+  /* ---------- helpers ---------- */
+  function iso(d) { var m = d.getMonth() + 1, x = d.getDate(); return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (x < 10 ? '0' : '') + x; }
+  function ago(n) { return iso(new Date(TODAY.getTime() - n * DAY)); }
+  function parse(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  var DOW = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function dShort(s) { var d = parse(s); return (d.getDate() < 10 ? '0' : '') + d.getDate() + ' ' + MON[d.getMonth()]; }
+  function dLong(s) { var d = parse(s); return dShort(s) + ' ' + d.getFullYear(); }
+  function money(n) { var neg = n < 0; n = Math.abs(n); var s = n.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','); return (neg ? '−' : '') + '$' + s; }
+  function money0(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+  function r2(n) { return Math.round(n * 100) / 100; }
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function initials(n) { return n.split(' ').map(function (w) { return w[0]; }).slice(0, 2).join('').toUpperCase(); }
+  function rng(seed) { return function () { seed |= 0; seed = seed + 0x6D2B79F5 | 0; var t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  var ICON = {
+    ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10"/></svg>',
+    wait: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    warn: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg>'
+  };
+
+  /* ---------- seed ---------- */
+  function seed() {
+    var id = 0;
+    function pk(name, total, used, boughtAgo, note) {
+      return { id: 'pk' + (++id), name: name, total: total, used: used, bought: ago(boughtAgo), status: used >= total ? 'Completed' : 'Active', note: note || '' };
+    }
+    function L(daysAgo, type, amount, note) { return { date: ago(daysAgo), type: type, amount: amount, note: note }; }
+    function V(daysAgo, what, note, by) { return { date: ago(daysAgo), what: what, note: note, by: by }; }
+    var clients = [
+      { id: 'c1', name: 'Sok Dalin', phone: '012 345 412', file: 'F-0412', member: 'Glow', tg: true, consent: true, since: ago(220),
+        pkgs: [pk('HydraFacial', 10, 4, 70, 'Shared with Sok Dara (sister)'), pk('Laser Toning', 5, 5, 220)],
+        ledger: [L(40, 'Top-up', 575, 'Paid $500 + 15% bonus'), L(20, 'Purchase', -62, 'Sunscreen SPF 50 ×2'), L(2, 'Purchase', -45, 'Vitamin C Serum 30ml')],
+        visits: [V(2, 'HydraFacial · session 4', 'Bought Vitamin C Serum with credit', 'Therapist A'), V(16, 'HydraFacial · session 3', 'Before photo saved', 'Therapist B'), V(30, 'HydraFacial · session 2', 'Joined Glow membership', 'Therapist A'), V(40, 'Homecare credit top-up', 'Paid $500, credit $575', 'Front Desk')],
+        skin: 'Concern: pigmentation and dryness. Skin is calmer since session 3. Keep SPF 50 daily.', next: 9 },
+      { id: 'c2', name: 'Chan Sreyneang', phone: '017 220 388', file: 'F-0388', member: 'VIP', tg: true, consent: true, since: ago(300),
+        pkgs: [pk('Laser Toning', 10, 8, 120)], ledger: [L(60, 'Top-up', 330, 'Paid $300 + 10% bonus'), L(30, 'Purchase', -104, 'Night Repair Cream ×2')],
+        visits: [V(14, 'Laser Toning · session 8', '', 'Therapist B')], skin: 'Concern: melasma on cheeks. Avoid strong sun.', next: 14 },
+      { id: 'c3', name: 'Lim Sophea', phone: '088 410 501', file: 'F-0501', member: '', tg: true, consent: false, since: ago(40),
+        pkgs: [pk('Acne Clear', 10, 2, 35)], ledger: [], visits: [V(14, 'Acne Clear · session 2', '', 'Therapist A')], skin: 'Concern: active acne on forehead.', next: 14 },
+      { id: 'c4', name: 'Keo Bopha', phone: '096 700 123', file: '', member: '', tg: false, consent: false, since: ago(1),
+        pkgs: [], ledger: [], visits: [], skin: 'Booked a free skin scan online.', next: null },
+      { id: 'c5', name: 'Heng Rachana', phone: '012 908 276', file: 'F-0276', member: 'Glow', tg: true, consent: true, since: ago(180),
+        pkgs: [pk('Whitening Drip', 6, 5, 90)], ledger: [L(50, 'Top-up', 330, 'Paid $300 + 10% bonus'), L(10, 'Purchase', -28, 'Hydrating Toner')],
+        visits: [V(14, 'Whitening Drip · session 5', '', 'Specialist 1')], skin: 'Even tone improving. Last session today.', next: null },
+      { id: 'c6', name: 'Meas Vanna', phone: '015 455 455', file: 'F-0455', member: '', tg: false, consent: true, since: ago(150),
+        pkgs: [pk('HydraFacial', 10, 7, 110)], ledger: [], visits: [V(14, 'HydraFacial · session 7', '', 'Therapist B')], skin: 'Concern: dull skin.', next: 14 },
+      { id: 'c7', name: 'Pich Sreymom', phone: '081 310 310', file: 'F-0310', member: 'Glow', tg: true, consent: true, since: ago(260),
+        pkgs: [pk('Laser Toning', 10, 5, 80)], ledger: [L(30, 'Opening Balance', 120, 'Balance from POS')], visits: [V(14, 'Laser Toning · session 5', '', 'Therapist A')], skin: 'Concern: dark spots.', next: 14 },
+      { id: 'c8', name: 'Ouk Chanthy', phone: '070 522 522', file: 'F-0522', member: '', tg: true, consent: false, since: ago(20),
+        pkgs: [pk('Acne Clear', 10, 1, 15)], ledger: [], visits: [V(14, 'Acne Clear · session 1', '', 'Therapist B')], skin: 'Concern: acne scars.', next: null },
+      { id: 'c9', name: 'Ros Sokunthea', phone: '011 560 777', file: 'F-0560', member: 'Glow', tg: true, consent: true, since: ago(200),
+        pkgs: [pk('HydraFacial', 10, 9, 130)], ledger: [L(25, 'Top-up', 575, 'Paid $500 + 15% bonus'), L(12, 'Purchase', -97, 'Vitamin C Serum, Night Repair Cream')], visits: [V(14, 'HydraFacial · session 9', '', 'Therapist A')], skin: 'Hydration good.', next: 1 },
+      { id: 'c10', name: 'Nhem Leakena', phone: '093 330 640', file: 'F-0640', member: '', tg: true, consent: true, since: ago(90),
+        pkgs: [pk('Laser Toning', 5, 2, 60)], ledger: [], visits: [V(45, 'Laser Toning · session 2', '', 'Therapist B')], skin: 'Concern: uneven tone.', next: 1 },
+      { id: 'c11', name: 'Touch Malis', phone: '097 812 905', file: '', member: '', tg: true, consent: false, since: ago(7),
+        pkgs: [], ledger: [], visits: [V(7, 'Free skin scan', 'Said "Not now". Follow up next week.', 'Specialist 1')], skin: 'Scan: mild pigmentation.', next: 1 },
+      { id: 'c12', name: 'Sok Dara', phone: '012 345 999', file: 'F-0413', member: '', tg: false, consent: true, since: ago(70),
+        pkgs: [], ledger: [], visits: [V(23, 'HydraFacial (shared package)', 'Uses Sok Dalin\'s package', 'Therapist A')], skin: '', next: null }
+    ];
+    var a = 0;
+    function A(time, cid, treat, status) { return { id: 'a' + (++a), time: time, cid: cid, treat: treat, status: status }; }
+    var appts = [
+      A('09:00', 'c1', 'HydraFacial', 'arrived'), A('09:30', 'c2', 'Laser Toning', 'arrived'), A('10:00', 'c3', 'Acne Clear', 'inroom'),
+      A('10:30', 'c4', 'Skin scan', 'confirmed'), A('11:00', 'c5', 'Whitening Drip', 'confirmed'), A('13:30', 'c6', 'HydraFacial', 'pending'),
+      A('14:00', 'c7', 'Laser Toning', 'confirmed'), A('15:00', 'c8', 'Acne Clear', 'pending')
+    ];
+    var tomorrow = [A('09:30', 'c9', 'HydraFacial', 'pending'), A('11:00', 'c10', 'Laser Toning', 'pending'), A('14:30', 'c11', 'Skin scan', 'pending')];
+
+    var R = rng(20261114), sales = [];
+    for (var d = 70; d >= 0; d--) {
+      var date = ago(d), dow = parse(date).getDay(), busy = ((dow === 0 || dow === 6) ? 1.3 : 1) * (0.85 + 0.3 * (70 - d) / 70);
+      if (R() < 0.62 * busy) { var p = PACKAGES[Math.floor(R() * PACKAGES.length)]; sales.push({ date: date, kind: 'package', amount: p.price }); }
+      var n = 1 + Math.floor(R() * 3 * busy);
+      for (var i = 0; i < n; i++) { var pr = PRODUCTS[Math.floor(R() * PRODUCTS.length)]; sales.push({ date: date, kind: 'product', amount: pr.price }); }
+      if (R() < 0.13) sales.push({ date: date, kind: 'credit', amount: R() < 0.5 ? 300 : 500 });
+    }
+    return { v: 1, clients: clients, appts: appts, tomorrow: tomorrow, sales: sales,
+      subs: [{ date: ago(0), cid: 'c2', text: 'Laser Toning session · product sale' }, { date: ago(0), cid: 'c1', text: 'Missing POS receipt no.' }],
+      future: [], seq: 100, made: iso(TODAY) };
+  }
+
+  /* ---------- state ---------- */
+  var S;
+  function load() {
+    try { var raw = localStorage.getItem(KEY); if (raw) { var o = JSON.parse(raw); if (o && o.made === iso(TODAY)) { S = o; S.future = S.future || []; return; } } } catch (e) { /* ignore */ }
+    S = seed(); save();
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
+  function client(id) { for (var i = 0; i < S.clients.length; i++) if (S.clients[i].id === id) return S.clients[i]; return null; }
+  function balance(c) { return r2(c.ledger.reduce(function (s, l) { return s + l.amount; }, 0)); }
+  function activePkgs(c) { return c.pkgs.filter(function (p) { return p.status === 'Active'; }); }
+  function pkgFor(c, treat) { var a = activePkgs(c); for (var i = 0; i < a.length; i++) if (a[i].name === treat) return a[i]; return a[0] || null; }
+  function newId(p) { S.seq++; return p + S.seq; }
+
+  /* ---------- UI helpers ---------- */
+  var main = document.getElementById('main');
+  var toastT;
+  function toast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('show'); }, 3200); }
+  function pill(kind, label) { var ic = kind === 'warn' ? ICON.warn : kind === 'wait' ? ICON.wait : (kind === 'ok' || kind === 'cf') ? ICON.ok : ''; return '<span class="pill p-' + kind + '">' + ic + esc(label) + '</span>'; }
+  var STATUS = { arrived: ['ok', 'Arrived'], inroom: ['wait', 'In treatment'], confirmed: ['cf', 'Confirmed'], pending: ['warn', 'Not reconfirmed'], done: ['ok', 'Visit recorded'] };
+  function setNav(name) { var as = document.querySelectorAll('.side a'); for (var i = 0; i < as.length; i++) as[i].classList.toggle('on', as[i].getAttribute('data-nav') === name); }
+
+  /* ---------- Today ---------- */
+  function viewToday() {
+    setNav('today');
+    var ap = S.appts, cnt = function (f) { return ap.filter(f).length; };
+    var arrived = cnt(function (a) { return a.status === 'arrived' || a.status === 'inroom' || a.status === 'done'; });
+    var tocome = cnt(function (a) { return a.status === 'confirmed' || a.status === 'pending'; });
+    var notrc = cnt(function (a) { return a.status === 'pending'; });
+    var d = TODAY;
+    var h = '<div class="head"><div><h1>Today\'s appointments</h1><p class="sub">ការណាត់ជួបថ្ងៃនេះ · ' + DOW[d.getDay()] + ' ' + dLong(iso(d)) + '</p></div>' +
+      '<a class="btn" href="#book">+ New booking</a><a class="btn primary" href="#sell">Record visit · កត់ត្រា</a></div>';
+    h += '<div class="kpis">' +
+      kpi('Booked today', ap.length, 'ការណាត់ជួប', '') + kpi('Arrived', arrived, 'បានមកដល់', 't2') +
+      kpi('Still to come', tocome, 'នៅរង់ចាំ', 't3') + kpi('Not reconfirmed', notrc, 'មិនទាន់បញ្ជាក់', 't4') + '</div>';
+    h += '<div class="cols"><section class="card flush c2" style="gap:0"><div class="card-h"><h2>Schedule · កាលវិភាគ</h2><span class="muted">' + ap.length + ' clients</span></div>';
+    ap.forEach(function (a) {
+      var c = client(a.cid), p = a.treat === 'Skin scan' ? null : pkgFor(c, a.treat), st = STATUS[a.status];
+      var prog = p ? '<small class="muted">' + (p.total - p.used) + ' left of ' + p.total + '</small><div class="bar"><i style="width:' + Math.round(p.used / p.total * 100) + '%"></i></div>' : '<small class="muted">' + (a.treat === 'Skin scan' ? 'Free scan' : 'No package') + '</small>';
+      var act;
+      if (a.status === 'pending') act = '<button type="button" class="btn small" data-act="confirm" data-id="' + a.id + '">Confirm</button>';
+      else if (a.status === 'confirmed') act = '<button type="button" class="btn small" data-act="checkin" data-id="' + a.id + '">Check in</button>';
+      else if (a.status === 'done') act = '<a class="btn small ghost" href="#client/' + c.id + '">View</a>';
+      else act = '<a class="btn small primary" href="#sell/' + c.id + '/' + a.id + '">Record visit</a>';
+      h += '<div class="sched-row"><b class="t num">' + a.time + '</b><a class="who-cell" href="#client/' + c.id + '"><b>' + esc(c.name) + '</b><small class="muted">' + (c.file ? 'File ' + esc(c.file) : 'New client') + '</small></a>' +
+        '<span class="tr">' + esc(a.treat) + '</span><div class="pg stack" style="gap:5px">' + prog + '</div><span class="st">' + pill(st[0], st[1]) + '</span><span class="sched-act">' + act + '</span></div>';
+    });
+    h += '</section><aside class="c1"><section class="card stack"><h2>Reconfirm tomorrow</h2><small class="muted" style="margin-top:-8px">បញ្ជាក់ការណាត់ថ្ងៃស្អែក · ' +
+      S.tomorrow.filter(function (t) { return t.status === 'confirmed'; }).length + ' of ' + S.tomorrow.length + ' done</small><div>';
+    S.tomorrow.forEach(function (t) {
+      var c = client(t.cid);
+      h += '<div class="list-item"><div><b>' + esc(c.name) + '</b><small class="muted">' + t.time + ' · ' + esc(t.treat) + '</small></div>' +
+        (t.status === 'confirmed' ? pill('cf', 'Confirmed') : '<button type="button" class="btn small" data-act="tconfirm" data-id="' + t.id + '">Confirm</button>') + '</div>';
+    });
+    h += '</div></section><section class="card stack"><h2>From Nana · ពី Nana</h2>';
+    var alerts = [];
+    ap.forEach(function (a) { if (a.treat === 'Skin scan') alerts.push(['var(--accent)', 'New skin-scan booking: ' + client(a.cid).name + ', today ' + a.time + '.']); });
+    ap.forEach(function (a) { var c = client(a.cid), p = pkgFor(c, a.treat); if (p && p.total - p.used === 1 && a.status !== 'done') alerts.push(['#C27A00', c.name + ' has her last session today. Offer a renewal.']); });
+    alerts.push(['var(--gold)', 'Birthday today: Sok Dalin. Greeting sent by Nana.']);
+    alerts.forEach(function (x) { h += '<div class="alert"><span class="dot" style="background:' + x[0] + '"></span><span>' + esc(x[1]) + '</span></div>'; });
+    h += '</section></aside></div><p class="muted" style="margin:0;font-size:12px">Sample data for the demo. Names and numbers are not real clients. <button type="button" class="btn small ghost" data-act="reset" style="margin-left:6px">Reset demo</button></p>';
+    main.innerHTML = h;
+  }
+  function kpi(label, val, kh, cls, subCls) { return '<div class="kpi ' + cls + '"><span>' + esc(label) + '</span><b class="num">' + val + '</b><small' + (subCls ? ' class="' + subCls + '"' : '') + '>' + esc(kh) + '</small></div>'; }
+
+  /* ---------- Clients ---------- */
+  function viewClients(q) {
+    setNav('clients');
+    q = q || '';
+    var h = '<div class="head"><div><h1>Clients</h1><p class="sub">អតិថិជន · ' + S.clients.length + ' clients</p></div></div>' +
+      '<div class="search" style="max-width:520px;background:#fff"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><label class="sr" for="cq">Filter clients</label><input id="cq" type="search" placeholder="Name, phone or file ID" value="' + esc(q) + '"></div>' +
+      '<section class="card flush"><div class="scroll"><table class="table"><thead><tr><th>Client</th><th class="hide-m">Phone</th><th class="hide-m">File</th><th>Sessions left</th><th>Credit</th></tr></thead><tbody id="ctb"></tbody></table></div></section>';
+    main.innerHTML = h;
+    fillClients(q);
+    var inp = document.getElementById('cq');
+    inp.addEventListener('input', function () { fillClients(inp.value); });
+  }
+  function match(c, q) { q = q.toLowerCase().replace(/\s/g, ''); if (!q) return true; return (c.name + c.phone + c.file).toLowerCase().replace(/\s/g, '').indexOf(q) >= 0; }
+  function fillClients(q) {
+    var rows = S.clients.filter(function (c) { return match(c, q); }).map(function (c) {
+      var left = activePkgs(c).reduce(function (s, p) { return s + p.total - p.used; }, 0), b = balance(c);
+      return '<tr data-href="#client/' + c.id + '"><td><a href="#client/' + c.id + '"><b>' + esc(c.name) + '</b></a>' + (c.member ? ' <span class="pill p-cf" style="margin-left:6px">' + esc(c.member) + '</span>' : '') + '</td><td class="hide-m num">' + esc(c.phone) + '</td><td class="hide-m">' + (esc(c.file) || '—') + '</td><td class="num">' + (activePkgs(c).length ? left : '—') + '</td><td class="num">' + (b ? money(b) : '—') + '</td></tr>';
+    });
+    document.getElementById('ctb').innerHTML = rows.join('') || '<tr><td colspan="5" class="muted">No client found. Check the phone number.</td></tr>';
+  }
+
+  /* ---------- Profile ---------- */
+  function viewProfile(id) {
+    setNav('clients');
+    var c = client(id);
+    if (!c) { go('#clients'); return; }
+    var b = balance(c);
+    var h = '<a href="#today" class="muted" style="font-size:13px">← Back to Today</a>';
+    h += '<section class="card hero"><span class="avatar">' + initials(c.name) + '</span><div class="hero-main"><h1>' + esc(c.name) + '</h1>' +
+      '<div class="meta"><span class="num">' + esc(c.phone) + '</span><span>' + (c.file ? 'File ' + esc(c.file) : 'No file yet') + '</span><span>Client since ' + dShort(c.since).slice(3) + ' ' + parse(c.since).getFullYear() + '</span></div><div class="chips">' +
+      (c.member ? '<span class="pill p-cf">' + esc(c.member) + ' member</span>' : '') +
+      (c.tg ? '<span class="pill p-ok">Telegram connected</span>' : '<span class="pill p-wait">Telegram not connected</span>') +
+      '<span class="pill p-wait">Photo consent: ' + (c.consent ? 'yes' : 'no') + '</span></div></div>' +
+      '<div class="row" style="flex-wrap:wrap"><a class="btn" href="#book/' + c.id + '">Book next</a><button type="button" class="btn" data-act="nana" data-id="' + c.id + '">Message via Nana</button><a class="btn primary" href="#sell/' + c.id + '">Record visit · កត់ត្រា</a></div></section>';
+    h += '<div class="cols"><div class="c2"><section class="card stack"><h2>Packages · កញ្ចប់</h2>';
+    if (!c.pkgs.length) h += '<p class="empty">No package yet. Sell one from Record visit.</p>';
+    c.pkgs.slice().sort(function (x, y) { return (x.status === 'Active' ? 0 : 1) - (y.status === 'Active' ? 0 : 1); }).forEach(function (p) {
+      var on = p.status === 'Active';
+      h += '<div class="pkg"><div class="pkg-top"><b>' + esc(p.name) + ' · ' + p.total + ' sessions</b>' + pill(on ? 'cf' : 'wait', on ? 'Active' : 'Completed') + '</div>' +
+        '<div class="bar thick"><i style="width:' + Math.round(p.used / p.total * 100) + '%;' + (on ? '' : 'background:#9AA5AE') + '"></i></div>' +
+        '<div class="meta" style="font-size:13px"><span>' + p.used + ' used · ' + (p.total - p.used) + ' left</span><span>Bought ' + dLong(p.bought) + '</span>' + (p.note ? '<span>' + esc(p.note) + '</span>' : '') + '</div></div>';
+    });
+    h += '</section><section class="card"><h2 style="margin-bottom:8px">Visit history · ប្រវត្តិការមក</h2>';
+    if (!c.visits.length) h += '<p class="empty">No visits yet.</p>';
+    c.visits.forEach(function (v) { h += '<div class="visit"><span class="muted num">' + dLong(v.date) + '</span><div class="stack" style="gap:2px"><b>' + esc(v.what) + '</b>' + (v.note ? '<small class="muted">' + esc(v.note) + '</small>' : '') + '</div><small class="muted">' + esc(v.by) + '</small></div>'; });
+    h += '</section></div><div class="c1"><section class="card stack"><h2>Homecare credit</h2><small class="muted" style="margin-top:-8px">ក្រេឌីតផលិតផលថែទាំ</small><span class="big num">' + money(b) + '</span>';
+    if (c.ledger.length) h += '<span>' + pill('ok', 'Matches POS · ' + dShort(c.ledger[c.ledger.length - 1].date)) + '</span>';
+    h += '<div>';
+    c.ledger.slice().reverse().forEach(function (l) { h += '<div class="ledger"><span class="muted" style="width:52px">' + dShort(l.date) + '</span><span>' + esc(l.type) + ' · ' + esc(l.note) + '</span><b class="num">' + (l.amount > 0 ? '+' : '') + money(l.amount) + '</b></div>'; });
+    if (!c.ledger.length) h += '<p class="empty">No credit yet. Top-up: $300 → $330 or $500 → $575.</p>';
+    h += '</div></section>';
+    var appt = S.appts.filter(function (a) { return a.cid === c.id && a.status !== 'done'; })[0], tm = S.tomorrow.filter(function (a) { return a.cid === c.id; })[0], fu = S.future.filter(function (a) { return a.cid === c.id; }).sort(function (a, b) { return (a.date + a.time) < (b.date + b.time) ? -1 : 1; })[0];
+    h += '<section class="card stack" style="gap:6px"><h2>Next appointment</h2>';
+    if (appt) h += '<b style="font-size:18px">Today · ' + appt.time + '</b><span class="muted">' + esc(appt.treat) + '</span><span>' + pill(STATUS[appt.status][0], STATUS[appt.status][1]) + '</span>';
+    else if (tm) h += '<b style="font-size:18px">Tomorrow · ' + tm.time + '</b><span class="muted">' + esc(tm.treat) + '</span><span>' + pill(tm.status === 'confirmed' ? 'cf' : 'warn', tm.status === 'confirmed' ? 'Confirmed' : 'Reconfirm today') + '</span>';
+    else if (fu) h += '<b style="font-size:18px">' + DOW[parse(fu.date).getDay()].slice(0, 3) + ' ' + dShort(fu.date) + ' · ' + fu.time + '</b><span class="muted">' + esc(fu.treat) + ' · ' + esc(fu.by) + '</span><span>' + pill('cf', 'Booked') + '</span>';
+    else if (c.next) h += '<b style="font-size:18px">' + DOW[parse(ago(-c.next)).getDay()].slice(0, 3) + ' ' + dShort(ago(-c.next)) + ' · 10:00</b><span class="muted">' + esc((activePkgs(c)[0] || {}).name || 'Follow-up') + '</span>';
+    else h += '<span class="muted">Not booked yet.</span><a class="btn small" href="#book/' + c.id + '" style="align-self:flex-start">Book next</a>';
+    h += '</section>';
+    if (c.skin) h += '<section class="card stack" style="gap:6px"><h2>Skin notes</h2><p style="margin:0">' + esc(c.skin) + '</p><small class="muted">Specialist 1</small></section>';
+    h += '</div></div>';
+    main.innerHTML = h;
+  }
+
+  /* ---------- Sell / Record ---------- */
+  var cart = null;
+  function newCart(cid, aid) {
+    var c = client(cid), a = null;
+    S.appts.forEach(function (x) { if (x.id === aid) a = x; });
+    var p = a && a.treat !== 'Skin scan' ? pkgFor(c, a.treat) : (activePkgs(c)[0] || null);
+    if (a && a.treat === 'Skin scan') p = null;
+    return { cid: cid, aid: a ? a.id : null, pkgUse: p ? p.id : null, treat: p ? p.name : (a ? a.treat : 'HydraFacial'), by: 'Therapist A', items: [], newPkg: null, topup: 'none', payCredit: false, method: METHODS[0], receipt: '' };
+  }
+  function calc() {
+    var c = client(cart.cid), b = balance(c);
+    var t = TOPUPS.filter(function (x) { return x.id === cart.topup; })[0];
+    var prod = r2(cart.items.reduce(function (s, it) { var p = PRODUCTS.filter(function (x) { return x.id === it.pid; })[0]; return s + p.price * it.qty; }, 0));
+    var member = !!c.member;
+    var disc = member && !cart.payCredit ? r2(prod * 0.10) : 0;
+    var prodCash = cart.payCredit ? 0 : r2(prod - disc);
+    var np = cart.newPkg ? PACKAGES.filter(function (x) { return x.id === cart.newPkg; })[0] : null;
+    var pay = r2(t.paid + prodCash + (np ? np.price : 0));
+    var after = r2(b + t.credit - (cart.payCredit ? prod : 0));
+    var usePkg = null; c.pkgs.forEach(function (p) { if (p.id === cart.pkgUse) usePkg = p; });
+    return { c: c, b: b, t: t, prod: prod, member: member, disc: disc, prodCash: prodCash, np: np, pay: pay, after: after, usePkg: usePkg,
+      short: cart.payCredit && after < 0, empty: !usePkg && !cart.items.length && !np && t.id === 'none' };
+  }
+  function viewSell(cid, aid) {
+    setNav('sell');
+    if (!cid) { cart = null; return viewPick(); }
+    if (!client(cid)) { go('#sell'); return; }
+    if (!cart || cart.cid !== cid || (aid && cart.aid !== aid)) cart = newCart(cid, aid);
+    renderSell();
+  }
+  function viewPick() {
+    var h = '<div class="head"><div><h1>Record visit and sale</h1><p class="sub">កត់ត្រាការមក និងការលក់ · first choose the client</p></div></div>' +
+      '<div class="search" style="max-width:520px;background:#fff"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><label class="sr" for="pq">Find client</label><input id="pq" type="search" placeholder="Type name, phone or file ID"></div><section class="card" id="plist"></section>';
+    main.innerHTML = h;
+    var inp = document.getElementById('pq');
+    function fill() {
+      var arr = S.clients.filter(function (c) { return match(c, inp.value); }).slice(0, 8);
+      document.getElementById('plist').innerHTML = arr.map(function (c) {
+        return '<div class="list-item"><span class="avatar">' + initials(c.name) + '</span><div><b>' + esc(c.name) + '</b><small class="muted">' + esc(c.phone) + (c.file ? ' · ' + esc(c.file) : '') + ' · Credit ' + money(balance(c)) + '</small></div><a class="btn small primary" href="#sell/' + c.id + '">Choose</a></div>';
+      }).join('') || '<p class="empty">No client found.</p>';
+    }
+    inp.addEventListener('input', fill); fill(); inp.focus();
+  }
+  function renderSell() {
+    var k = calc(), c = k.c;
+    var sel = function (on) { return on ? ' on' : ''; };
+    var h = '<div class="cols"><div class="c2"><div><h1>Record visit and sale</h1><p class="sub">កត់ត្រាការមក និងការលក់ · one record per visit</p></div>';
+    h += '<section class="card hero" style="gap:14px"><span class="avatar">' + initials(c.name) + '</span><div class="hero-main" style="gap:2px"><b style="font-size:16px">' + esc(c.name) + (c.file ? ' · ' + esc(c.file) : '') + '</b><small class="muted">' +
+      (activePkgs(c).map(function (p) { return p.name + ' ' + (p.total - p.used) + ' left'; }).join(' · ') || 'No active package') + ' · Credit ' + money(k.b) + (c.member ? ' · ' + c.member + ' member' : '') + '</small></div><a class="btn small" href="#sell">Change client</a></section>';
+    // 1 treatment
+    h += '<section class="card stack" style="gap:14px"><h2>1 · Treatment today · ការព្យាបាលថ្ងៃនេះ</h2><div class="opts">';
+    activePkgs(c).forEach(function (p) {
+      h += '<button type="button" class="opt' + sel(cart.pkgUse === p.id) + '" data-act="usepkg" data-id="' + p.id + '"><b>Use 1 session · ' + esc(p.name) + '</b><small>Session ' + (p.used + 1) + ' of ' + p.total + ' · ' + (p.total - p.used - 1) + ' left after</small></button>';
+    });
+    h += '<button type="button" class="opt' + sel(!cart.pkgUse) + '" data-act="usepkg" data-id=""><b>No session today</b><small>Products, scan or consultation only</small></button></div>';
+    h += '<div class="grid2"><label class="field">Done by<select data-f="by">' + STAFF.map(function (s) { return '<option' + (s === cart.by ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></label></div></section>';
+    // 2 new package
+    h += '<section class="card stack" style="gap:14px"><h2>2 · Buy a package · ទិញកញ្ចប់</h2><div class="opts"><button type="button" class="opt' + sel(!cart.newPkg) + '" data-act="newpkg" data-id=""><b>No new package</b><small>Skip</small></button>';
+    PACKAGES.forEach(function (p) { h += '<button type="button" class="opt' + sel(cart.newPkg === p.id) + '" data-act="newpkg" data-id="' + p.id + '"><b>' + esc(p.name) + '</b><small>' + p.sessions + ' sessions · ' + money0(p.price) + '</small></button>'; });
+    h += '</div></section>';
+    // 3 products
+    h += '<section class="card stack"><h2>3 · Homecare products · ផលិតផល</h2>';
+    cart.items.forEach(function (it, i) {
+      var p = PRODUCTS.filter(function (x) { return x.id === it.pid; })[0];
+      h += '<div class="line-item"><span>' + esc(p.name) + '</span><span class="qty"><button type="button" data-act="qty" data-i="' + i + '" data-d="-1" aria-label="Less">−</button><b class="num">' + it.qty + '</b><button type="button" data-act="qty" data-i="' + i + '" data-d="1" aria-label="More">+</button></span><span class="num" style="text-align:right">' + money(p.price * it.qty) + '</span><button type="button" class="x" data-act="rm" data-i="' + i + '" aria-label="Remove ' + esc(p.name) + '">×</button></div>';
+    });
+    if (!cart.items.length) h += '<p class="empty" style="padding:0">No products yet.</p>';
+    h += '<div class="row" style="flex-wrap:wrap"><label class="sr" for="addp">Product</label><select id="addp" class="btn" style="font-weight:500;flex:1 1 220px;justify-content:flex-start">' + PRODUCTS.map(function (p) { return '<option value="' + p.id + '">' + esc(p.name) + ' · ' + money(p.price) + '</option>'; }).join('') + '</select><button type="button" class="btn" data-act="addp">+ Add product</button></div></section>';
+    // 4 credit
+    h += '<section class="card stack" style="gap:14px"><h2>4 · Homecare credit · ក្រេឌីត</h2><small class="muted" style="margin-top:-8px">Buy credit today?</small><div class="opts">';
+    TOPUPS.forEach(function (t) { h += '<button type="button" class="opt' + sel(cart.topup === t.id) + '" data-act="topup" data-id="' + t.id + '"><b>' + t.title + '</b><small>' + t.sub + '</small></button>'; });
+    h += '</div><button type="button" class="switch" data-act="paycredit" aria-pressed="' + cart.payCredit + '"' + (cart.items.length ? '' : ' disabled') + '><span class="trk"></span><span class="stack" style="gap:0"><b>Pay products with credit</b><small class="muted">Credit now ' + money(k.b) + '. No discount when paying with credit.</small></span></button></section>';
+    h += '</div>';
+    // summary
+    h += '<aside class="c1 card stack sticky" style="gap:10px"><h2>Check before submitting</h2><small class="muted" style="margin-top:-8px">ពិនិត្យមុនបញ្ជូន</small><div>';
+    var line = function (a, b) { h += '<div class="sum-line"><span>' + a + '</span><span class="num">' + b + '</span></div>'; };
+    line('Session', k.usePkg ? esc(k.usePkg.name) + ' ' + (k.usePkg.used + 1) + ' of ' + k.usePkg.total : 'None');
+    line('New package', k.np ? esc(k.np.name) + ' · ' + money(k.np.price) : 'None');
+    line('Products', money(k.prod));
+    if (k.member) line(c.member + ' discount 10%', cart.payCredit ? 'Not with credit' : (k.disc ? '−' + money(k.disc) : '—'));
+    line('Products paid by', cart.items.length ? (cart.payCredit ? 'Homecare credit' : 'Payment') : '—');
+    line('Credit top-up', k.t.paid ? money(k.t.paid) + ' → ' + money(k.t.credit) : 'None');
+    h += '</div><div class="total"><span>To pay now</span><b class="num">' + money(k.pay) + '</b></div>';
+    h += '<div class="credit-box"><span>Credit after this visit</span><b class="num">' + money(k.after) + '</b></div>';
+    if (k.short) h += '<div class="warnbox">Not enough credit. Add a top-up or switch off "Pay with credit".</div>';
+    if (k.pay > 0) h += '<label class="field">Payment method<select data-f="method">' + METHODS.map(function (m) { return '<option' + (m === cart.method ? ' selected' : '') + '>' + m + '</option>'; }).join('') + '</select></label>';
+    h += '<label class="field">POS receipt no.<input type="text" data-f="receipt" placeholder="e.g. R-10482" value="' + esc(cart.receipt) + '"></label>';
+    h += '<button type="button" class="btn primary" data-act="submit" style="min-height:52px;font-size:16px"' + (k.short || k.empty ? ' disabled' : '') + '>Submit · បញ្ជូន</button>';
+    h += '<small class="muted">Submit once per visit. A mistake goes to the admin, never a second submit.</small></aside></div>';
+    var y = window.scrollY;
+    main.innerHTML = h;
+    window.scrollTo(0, y);
+  }
+  function submit() {
+    var k = calc(), c = k.c, today = iso(TODAY), notes = [], what;
+    if (k.usePkg) { k.usePkg.used++; if (k.usePkg.used >= k.usePkg.total) k.usePkg.status = 'Completed'; what = k.usePkg.name + ' · session ' + k.usePkg.used + ' of ' + k.usePkg.total; }
+    if (k.np) { c.pkgs.push({ id: newId('pk'), name: k.np.name, total: k.np.sessions, used: 0, bought: today, status: 'Active', note: '' }); S.sales.push({ date: today, kind: 'package', amount: k.np.price }); notes.push('Bought ' + k.np.name + ' ' + k.np.sessions + ' sessions'); if (!what) what = 'New package · ' + k.np.name; }
+    if (k.t.paid) { c.ledger.push({ date: today, type: 'Top-up', amount: k.t.credit, note: 'Paid ' + money0(k.t.paid) + ' + bonus' }); S.sales.push({ date: today, kind: 'credit', amount: k.t.paid }); notes.push('Credit top-up ' + money0(k.t.paid) + ' → ' + money0(k.t.credit)); if (!what) what = 'Homecare credit top-up'; }
+    if (cart.items.length) {
+      var names = cart.items.map(function (it) { var p = PRODUCTS.filter(function (x) { return x.id === it.pid; })[0]; return p.name + (it.qty > 1 ? ' ×' + it.qty : ''); }).join(', ');
+      if (cart.payCredit) { c.ledger.push({ date: today, type: 'Purchase', amount: -k.prod, note: names }); notes.push('Bought ' + names + ' with credit'); }
+      else { S.sales.push({ date: today, kind: 'product', amount: k.prodCash }); notes.push('Bought ' + names); }
+      if (!what) what = 'Homecare purchase';
+    }
+    if (!what) what = 'Visit';
+    c.visits.unshift({ date: today, what: what, note: notes.join(' · '), by: cart.by });
+    if (cart.aid) S.appts.forEach(function (a) { if (a.id === cart.aid) a.status = 'done'; });
+    S.subs.push({ date: today, cid: c.id, text: what + (cart.receipt ? '' : ' · missing POS receipt no.') });
+    save();
+    var bal = balance(c), cid = c.id;
+    cart = null;
+    toast('Submitted · បានបញ្ជូន. ' + c.name + (bal ? ' — credit ' + money(bal) : ''));
+    go('#client/' + cid);
+  }
+
+  /* ---------- Booking ---------- */
+  var bk = null;
+  var SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00'];
+  function newBk(cid) {
+    var c = client(cid), a = activePkgs(c)[0];
+    var late = new Date().getHours() * 60 + new Date().getMinutes() > 16 * 60 + 30;
+    return { cid: cid, treat: a ? a.name : 'Skin scan', date: ago(late ? -1 : -1), time: null, by: 'Therapist A', remind: !!c.tg };
+  }
+  function takenOn(date) {
+    var t = {};
+    if (date === iso(TODAY)) S.appts.forEach(function (a) { t[a.time] = client(a.cid).name; });
+    if (date === ago(-1)) S.tomorrow.forEach(function (a) { t[a.time] = client(a.cid).name; });
+    S.future.forEach(function (a) { if (a.date === date) t[a.time] = client(a.cid).name; });
+    return t;
+  }
+  function viewBook(cid) {
+    setNav('today');
+    if (!cid) { bk = null; return viewBookPick(); }
+    if (!client(cid)) { go('#book'); return; }
+    if (!bk || bk.cid !== cid) bk = newBk(cid);
+    renderBook();
+  }
+  function viewBookPick() {
+    var h = '<div class="head"><div><h1>New booking</h1><p class="sub">ការណាត់ថ្មី · choose the client</p></div></div>' +
+      '<div class="cols"><div class="c2"><div class="search" style="background:#fff"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><label class="sr" for="bq">Find client</label><input id="bq" type="search" placeholder="Type name, phone or file ID"></div><section class="card" id="blist"></section></div>' +
+      '<aside class="c1 card stack"><h2>New client · អតិថិជនថ្មី</h2><small class="muted" style="margin-top:-8px">First visit or phone booking</small>' +
+      '<label class="field">Full name<input id="nn" type="text" autocomplete="off" placeholder="e.g. Chea Sreypov"></label>' +
+      '<label class="field">Phone (client\'s own)<input id="np" type="tel" autocomplete="off" placeholder="e.g. 012 345 678"></label>' +
+      '<p class="warnbox" id="nerr" hidden></p><button type="button" class="btn primary" data-act="addclient">Add client and continue</button></aside></div>';
+    main.innerHTML = h;
+    var inp = document.getElementById('bq');
+    function fill() {
+      var arr = S.clients.filter(function (c) { return match(c, inp.value); }).slice(0, 8);
+      document.getElementById('blist').innerHTML = arr.map(function (c) {
+        var a = activePkgs(c)[0];
+        return '<div class="list-item"><span class="avatar">' + initials(c.name) + '</span><div><b>' + esc(c.name) + '</b><small class="muted">' + esc(c.phone) + (a ? ' · ' + esc(a.name) + ' ' + (a.total - a.used) + ' left' : ' · No package') + '</small></div><a class="btn small primary" href="#book/' + c.id + '">Choose</a></div>';
+      }).join('') || '<p class="empty">No client found. Add her as a new client.</p>';
+    }
+    inp.addEventListener('input', fill); fill(); inp.focus();
+  }
+  function renderBook() {
+    var c = client(bk.cid), sel = function (on) { return on ? ' on' : ''; };
+    var h = '<div class="cols"><div class="c2"><div><h1>New booking</h1><p class="sub">ការណាត់ថ្មី · pick treatment, day and time</p></div>';
+    h += '<section class="card hero" style="gap:14px"><span class="avatar">' + initials(c.name) + '</span><div class="hero-main" style="gap:2px"><b style="font-size:16px">' + esc(c.name) + (c.file ? ' · ' + esc(c.file) : '') + '</b><small class="muted">' + esc(c.phone) + ' · ' + (c.tg ? 'Telegram connected' : 'Not on Telegram yet') + '</small></div><a class="btn small" href="#book">Change client</a></section>';
+    // treatment
+    var opts = [], seen = {};
+    activePkgs(c).forEach(function (p) { seen[p.name] = 1; opts.push([p.name, 'From package · ' + (p.total - p.used) + ' left']); });
+    opts.push(['Skin scan', 'Free scan + consultation']);
+    PACKAGES.forEach(function (p) { if (!seen[p.name]) opts.push([p.name, 'Trial or new package']); });
+    h += '<section class="card stack" style="gap:14px"><h2>1 · Treatment · ការព្យាបាល</h2><div class="opts">';
+    opts.forEach(function (o) { h += '<button type="button" class="opt' + sel(bk.treat === o[0]) + '" data-act="bktreat" data-id="' + esc(o[0]) + '"><b>' + esc(o[0]) + '</b><small>' + esc(o[1]) + '</small></button>'; });
+    h += '</div></section>';
+    // day
+    h += '<section class="card stack" style="gap:14px"><h2>2 · Day · ថ្ងៃ</h2><div class="opts" style="grid-template-columns:repeat(auto-fit,minmax(104px,1fr))">';
+    for (var i = 0; i < 7; i++) {
+      var d = ago(-i), dd = parse(d), lab = i === 0 ? 'Today' : i === 1 ? 'Tomorrow' : DOW[dd.getDay()].slice(0, 3);
+      h += '<button type="button" class="opt' + sel(bk.date === d) + '" data-act="bkday" data-id="' + d + '"><b>' + lab + '</b><small>' + dShort(d) + '</small></button>';
+    }
+    h += '</div></section>';
+    // time
+    var taken = takenOn(bk.date), now = new Date(), nowMin = now.getHours() * 60 + now.getMinutes(), isToday = bk.date === iso(TODAY);
+    h += '<section class="card stack" style="gap:14px"><h2>3 · Time · ម៉ោង</h2><div class="opts" style="grid-template-columns:repeat(auto-fill,minmax(96px,1fr))">';
+    SLOTS.forEach(function (t) {
+      var m = +t.slice(0, 2) * 60 + +t.slice(3), past = isToday && m <= nowMin, who = taken[t];
+      h += '<button type="button" class="opt' + sel(bk.time === t) + '" data-act="bktime" data-id="' + t + '"' + (past || who ? ' disabled' : '') + ' style="min-height:56px"><b class="num">' + t + '</b><small>' + (who ? 'Booked' : past ? 'Passed' : 'Free') + '</small></button>';
+    });
+    h += '</div><small class="muted">One client per time slot in this demo. Lunch break 12:00–13:00.</small></section>';
+    // staff + reminder
+    h += '<section class="card stack" style="gap:14px"><h2>4 · Staff and reminder</h2><div class="grid2"><label class="field">With<select data-bf="by">' + STAFF.slice(0, 3).map(function (s) { return '<option' + (s === bk.by ? ' selected' : '') + '>' + s + '</option>'; }).join('') + '</select></label></div>';
+    if (c.tg) h += '<button type="button" class="switch" data-act="bkremind" aria-pressed="' + bk.remind + '"><span class="trk"></span><span class="stack" style="gap:0"><b>Nana sends a reminder</b><small class="muted">Khmer message on Telegram the day before, with Confirm and Reschedule buttons</small></span></button>';
+    else h += '<div class="warnbox">' + esc(c.name) + ' is not on Telegram yet. Front desk calls her the day before. Give her the Nana QR card at the visit.</div>';
+    h += '</section></div>';
+    // summary
+    var dlab = bk.date === iso(TODAY) ? 'Today' : bk.date === ago(-1) ? 'Tomorrow' : DOW[parse(bk.date).getDay()];
+    h += '<aside class="c1 card stack sticky" style="gap:10px"><h2>Check the booking</h2><small class="muted" style="margin-top:-8px">ពិនិត្យការណាត់</small><div>';
+    [['Client', esc(c.name)], ['Treatment', esc(bk.treat)], ['Day', dlab + ', ' + dLong(bk.date)], ['Time', bk.time || 'Choose a time'], ['With', esc(bk.by)], ['Reminder', c.tg ? (bk.remind ? 'Nana, day before' : 'None') : 'Phone call']].forEach(function (x) {
+      h += '<div class="sum-line"><span>' + x[0] + '</span><span>' + x[1] + '</span></div>';
+    });
+    h += '</div><button type="button" class="btn primary" data-act="bksave" style="min-height:52px;font-size:16px"' + (bk.time ? '' : ' disabled') + '>Save booking · រក្សាទុក</button>';
+    h += '<small class="muted">The booking shows on Today and on her profile straight away.</small></aside></div>';
+    var y = window.scrollY; main.innerHTML = h; window.scrollTo(0, y);
+  }
+  function saveBooking() {
+    var c = client(bk.cid), id = newId('a');
+    if (bk.date === iso(TODAY)) { S.appts.push({ id: id, time: bk.time, cid: c.id, treat: bk.treat, status: 'confirmed' }); S.appts.sort(function (a, b) { return a.time < b.time ? -1 : 1; }); }
+    else if (bk.date === ago(-1)) { S.tomorrow.push({ id: id, time: bk.time, cid: c.id, treat: bk.treat, status: 'pending' }); S.tomorrow.sort(function (a, b) { return a.time < b.time ? -1 : 1; }); }
+    else S.future.push({ id: id, date: bk.date, time: bk.time, cid: c.id, treat: bk.treat, by: bk.by });
+    c.next = null;
+    save();
+    var msg = 'Booked · បានណាត់. ' + c.name + ', ' + (bk.date === iso(TODAY) ? 'today' : dShort(bk.date)) + ' ' + bk.time + '.';
+    if (c.tg && bk.remind && bk.date !== iso(TODAY)) msg += ' Nana will remind her the day before.';
+    var cid = c.id; bk = null; toast(msg); go('#client/' + cid);
+  }
+  function addClient() {
+    var n = document.getElementById('nn').value.trim(), p = document.getElementById('np').value.trim(), err = document.getElementById('nerr');
+    var digits = p.replace(/\D/g, '');
+    if (n.length < 3) { err.textContent = 'Type the client\'s full name.'; err.hidden = false; return; }
+    if (digits.length < 9 || digits.length > 10 || digits[0] !== '0') { err.textContent = 'Type a Cambodian phone number with 9 or 10 digits, starting with 0.'; err.hidden = false; return; }
+    var dup = S.clients.filter(function (c) { return c.phone.replace(/\D/g, '') === digits; })[0];
+    if (dup) { err.textContent = 'This phone already belongs to ' + dup.name + '. Choose her from the list.'; err.hidden = false; return; }
+    var fmt = digits.slice(0, 3) + ' ' + digits.slice(3, 6) + ' ' + digits.slice(6);
+    var c = { id: newId('c'), name: n, phone: fmt, file: '', member: '', tg: false, consent: false, since: iso(TODAY), pkgs: [], ledger: [], visits: [], skin: '', next: null };
+    S.clients.push(c); save(); toast('Client added · បានបន្ថែម'); go('#book/' + c.id);
+  }
+
+  /* ---------- Dashboard ---------- */
+  var period = 'this';
+  function viewDashboard() {
+    setNav('dashboard');
+    var y = TODAY.getFullYear(), m = TODAY.getMonth(), dd = TODAY.getDate();
+    var startThis = iso(new Date(y, m, 1)), startLast = iso(new Date(y, m - 1, 1)), endLast = iso(new Date(y, m, 0));
+    var sameLast = iso(new Date(y, m - 1, Math.min(dd, new Date(y, m, 0).getDate())));
+    function sum(from, to, kind) { return S.sales.reduce(function (s, x) { return (x.date >= from && x.date <= to && (!kind || x.kind === kind)) ? s + x.amount : s; }, 0); }
+    var tdy = iso(TODAY), isThis = period === 'this';
+    var from = isThis ? startThis : startLast, to = isThis ? tdy : endLast;
+    var total = sum(from, to), cmp = isThis ? sum(startLast, sameLast) : sum(iso(new Date(y, m - 2, 1)), iso(new Date(y, m - 1, 0)));
+    var pct = cmp ? Math.round((total - cmp) / cmp * 100) : 0;
+    var owedSess = 0, owedCredit = 0, withPkg = 0, booked = 0;
+    var bookedIds = {}; S.future.forEach(function (a) { bookedIds[a.cid] = 1; }); S.tomorrow.forEach(function (a) { bookedIds[a.cid] = 1; });
+    S.clients.forEach(function (c) { var a = activePkgs(c); a.forEach(function (p) { owedSess += p.total - p.used; }); owedCredit += balance(c); if (a.length) { withPkg++; if (bookedIds[c.id] || c.next) booked++; } });
+    var rebook = withPkg ? Math.round(booked / withPkg * 100) : 0;
+    var label = isThis ? MON[m] + ' ' + y + ' (to date)' : MON[(m + 11) % 12] + ' ' + (m === 0 ? y - 1 : y);
+    var h = '<div class="head"><div><h1>Owner dashboard</h1><p class="sub">ផ្ទាំងគ្រប់គ្រងម្ចាស់ · ' + label + '</p></div><div class="seg" role="group" aria-label="Period"><button type="button" data-act="period" data-id="this" class="' + (isThis ? 'on' : '') + '">This month</button><button type="button" data-act="period" data-id="last" class="' + (isThis ? '' : 'on') + '">Last month</button></div></div>';
+    h += '<div class="kpis">' + kpi(isThis ? 'Sales this month' : 'Sales last month', money0(total), (pct >= 0 ? '+' : '') + pct + '% vs ' + (isThis ? 'same days last month' : 'month before'), '', pct >= 0 ? 'up' : '') +
+      kpi('Prepaid sessions owed', owedSess, 'Sessions clients still have', 't2') + kpi('Homecare credit owed', money0(owedCredit), 'Balance clients can still spend', 't3') +
+      kpi('Rebooked', rebook + '%', 'Package clients with a next booking', 't2') + '</div>';
+    // weekly
+    var weeks = [];
+    for (var w = 5; w >= 0; w--) { var e = new Date(TODAY.getTime() - w * 7 * DAY), s = new Date(e.getTime() - 6 * DAY); weeks.push({ s: iso(s), e: iso(e), v: sum(iso(s), iso(e)) }); }
+    var max = Math.max.apply(null, weeks.map(function (x) { return x.v; })) || 1;
+    h += '<div class="cols"><section class="card stack c2" style="gap:12px"><h2>Sales by week · ការលក់ប្រចាំសប្ដាហ៍</h2><div class="chart" role="img" aria-label="' + esc(weeks.map(function (x) { return 'Week to ' + dShort(x.e) + ': ' + money0(x.v); }).join(', ')) + '">';
+    weeks.forEach(function (x, i) { h += '<div class="col' + (i === 5 ? ' now' : '') + '"><span class="num">' + money0(x.v) + '</span><i style="height:' + Math.max(4, Math.round(x.v / max * 160)) + 'px"></i></div>'; });
+    h += '</div><div class="chart-x">' + weeks.map(function (x, i) { return '<span>' + (i === 5 ? 'Last 7 days' : 'to ' + dShort(x.e)) + '</span>'; }).join('') + '</div></section>';
+    var mix = [['Treatment packages', sum(from, to, 'package'), 'var(--accent)'], ['Homecare products', sum(from, to, 'product'), 'var(--gold)'], ['Credit top-ups', sum(from, to, 'credit'), 'var(--ink)']];
+    var mmax = Math.max(mix[0][1], mix[1][1], mix[2][1]) || 1;
+    h += '<section class="card stack c1" style="gap:14px"><h2>Where sales come from</h2>';
+    mix.forEach(function (x) { h += '<div class="mix"><div class="row"><span>' + x[0] + '</span><b class="num">' + money0(x[1]) + '</b></div><div class="bar thick"><i style="width:' + Math.round(x[1] / mmax * 100) + '%;background:' + x[2] + '"></i></div></div>'; });
+    h += '<small class="muted">Products paid with homecare credit are not counted again here. The cash came in at top-up.</small></section></div>';
+    // lists
+    var fol = [];
+    S.appts.forEach(function (a) { if (a.status === 'pending') fol.push([client(a.cid).name, 'Not reconfirmed for today ' + a.time]); });
+    S.tomorrow.forEach(function (a) { if (a.status === 'pending') fol.push([client(a.cid).name, 'Reconfirm for tomorrow ' + a.time]); });
+    S.clients.forEach(function (c) { if (!c.pkgs.length && c.visits.length && c.visits[0].what === 'Free skin scan') fol.push([c.name, 'Scan on ' + dShort(c.visits[0].date) + ', said Not now']); });
+    var seen = {}; fol = fol.filter(function (x) { if (seen[x[0]]) return false; seen[x[0]] = 1; return true; });
+    var end = [];
+    S.clients.forEach(function (c) { c.pkgs.forEach(function (p) { if (p.status === 'Active' && p.total - p.used <= 1) end.push([c.name, p.name + ' · ' + (p.total - p.used) + ' left. Offer a renewal']); else if (p.status === 'Completed' && p.bought > ago(200) && !activePkgs(c).length) end.push([c.name, p.name + ' finished. No new package yet']); }); });
+    var chk = S.subs.filter(function (s) { return s.date === tdy; }).map(function (s) { return [client(s.cid).name, s.text]; });
+    h += '<div class="lists">' + listCard('Follow-ups due', fol, 'background:var(--goldSoft);color:var(--goldInk)') + listCard('Packages ending', end, 'background:var(--soft);color:var(--ink)') + listCard('Needs admin check today', chk, 'background:var(--warnBg);color:var(--warn)') + '</div>';
+    h += '<p class="muted" style="margin:0;font-size:12px">Sample data. In the real system these numbers come straight from the clinic\'s records.</p>';
+    main.innerHTML = h;
+  }
+  function listCard(title, arr, badge) {
+    var h = '<section class="card"><div class="row" style="margin-bottom:6px"><h2 style="flex:1;font-size:15px">' + title + '</h2><span class="pill" style="' + badge + '">' + arr.length + '</span></div>';
+    arr.slice(0, 5).forEach(function (x) { h += '<div class="li"><b>' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small></div>'; });
+    if (!arr.length) h += '<p class="empty">Nothing waiting.</p>';
+    return h + '</section>';
+  }
+
+  /* ---------- router (in-page; the artifact frame keeps the URL fixed) ---------- */
+  var cur = /^#(today|clients|sell|dashboard)$/.test(location.hash) ? location.hash : '#today';
+  function go(h) { cur = h; route(); }
+  function route() {
+    var hsh = (cur || '#today').slice(1), parts = hsh.split('/'), q = '';
+    var qi = parts[0].indexOf('?'); if (qi >= 0) { q = decodeURIComponent(parts[0].slice(qi + 3)); parts[0] = parts[0].slice(0, qi); }
+    if (parts[0] !== 'sell') cart = null;
+    if (parts[0] !== 'book') bk = null;
+    switch (parts[0]) {
+      case 'clients': viewClients(q); break;
+      case 'client': viewProfile(parts[1]); break;
+      case 'sell': viewSell(parts[1], parts[2]); break;
+      case 'dashboard': viewDashboard(); break;
+      case 'book': viewBook(parts[1]); break;
+      default: viewToday();
+    }
+    if ((parts[0] !== 'sell' && parts[0] !== 'book') || !parts[1]) window.scrollTo(0, 0);
+  }
+
+  /* ---------- events ---------- */
+  document.addEventListener('click', function (ev) {
+    var lk = ev.target.closest('a[href^="#"]');
+    if (lk) { ev.preventDefault(); go(lk.getAttribute('href')); return; }
+    var tr = ev.target.closest('tr[data-href]');
+    if (tr && !ev.target.closest('a')) { go(tr.getAttribute('data-href')); return; }
+    var el = ev.target.closest('[data-act]'); if (!el || el.disabled) return;
+    var act = el.getAttribute('data-act'), id = el.getAttribute('data-id');
+    function findA(list) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; }
+    switch (act) {
+      case 'confirm': findA(S.appts).status = 'confirmed'; save(); viewToday(); toast('Confirmed · បានបញ្ជាក់'); break;
+      case 'checkin': findA(S.appts).status = 'arrived'; save(); viewToday(); toast('Checked in. Nana tells the therapist.'); break;
+      case 'tconfirm': findA(S.tomorrow).status = 'confirmed'; save(); viewToday(); toast('Tomorrow confirmed. File goes on the Specialist\'s desk.'); break;
+      case 'newbook': case 'book': toast('Booking screen comes in the full version.'); break;
+      case 'nana': toast('Nana sends a Khmer message to ' + client(id).name + ' on Telegram (demo).'); break;
+      case 'reset': doReset(); break;
+      case 'usepkg': cart.pkgUse = id || null; renderSell(); break;
+      case 'newpkg': cart.newPkg = id || null; renderSell(); break;
+      case 'topup': cart.topup = id; renderSell(); break;
+      case 'paycredit': cart.payCredit = !cart.payCredit; renderSell(); break;
+      case 'addp': var pid = document.getElementById('addp').value, ex = cart.items.filter(function (x) { return x.pid === pid; })[0]; if (ex) ex.qty++; else cart.items.push({ pid: pid, qty: 1 }); renderSell(); break;
+      case 'qty': var it = cart.items[+el.getAttribute('data-i')]; it.qty = Math.max(1, it.qty + (+el.getAttribute('data-d'))); renderSell(); break;
+      case 'rm': cart.items.splice(+el.getAttribute('data-i'), 1); if (!cart.items.length) cart.payCredit = false; renderSell(); break;
+      case 'submit': submit(); break;
+      case 'bktreat': bk.treat = id; renderBook(); break;
+      case 'bkday': bk.date = id; bk.time = null; renderBook(); break;
+      case 'bktime': bk.time = id; renderBook(); break;
+      case 'bkremind': bk.remind = !bk.remind; renderBook(); break;
+      case 'bksave': saveBooking(); break;
+      case 'addclient': addClient(); break;
+      case 'period': period = id; viewDashboard(); break;
+    }
+  });
+  document.addEventListener('change', function (ev) {
+    var f = ev.target.getAttribute && ev.target.getAttribute('data-f');
+    if (f && cart) { cart[f] = ev.target.value; if (f === 'method') return; }
+    if (ev.target.getAttribute && ev.target.getAttribute('data-bf') && bk) { bk.by = ev.target.value; renderBook(); }
+  });
+  document.addEventListener('input', function (ev) {
+    var f = ev.target.getAttribute && ev.target.getAttribute('data-f');
+    if (f === 'receipt' && cart) cart.receipt = ev.target.value;
+  });
+  document.getElementById('topSearch').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var v = document.getElementById('q').value.trim();
+    var hits = S.clients.filter(function (c) { return match(c, v); });
+    go(hits.length === 1 ? '#client/' + hits[0].id : '#clients?q=' + encodeURIComponent(v));
+  });
+  document.getElementById('resetBtn').addEventListener('click', doReset);
+  function doReset() { S = seed(); save(); cart = null; period = 'this'; toast('Demo data reset.'); go('#today'); }
+
+  document.getElementById('todayLabel').textContent = DOW[TODAY.getDay()].slice(0, 3) + ' ' + dLong(iso(TODAY));
+  load();
+  route();
+})();
+</script>
+</body>
+</html>
