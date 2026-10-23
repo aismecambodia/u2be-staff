@@ -84,6 +84,8 @@
           <label>Shared sessions of (payer's name) <span class="km">ប្រើវគ្គព្យាបាលរួមជាមួយ (ឈ្មោះអ្នកបង់)</span></label>
           <input id="payer" type="text" autocomplete="off">
         </div>
+        <label class="toggle" style="margin-top:12px"><input id="half" type="checkbox"> ½ Half session (Specialist's advice) · <span class="km">វគ្គព្យាបាលពាក់កណ្តាល (តាមការណែនាំរបស់អ្នកជំនាញ)</span></label>
+        <p class="hint">Tick only when the Specialist did half a session today. It counts 0.5 from the package. <span class="km">ធីកតែពេលអ្នកជំនាញធ្វើពាក់កណ្តាលវគ្គ។ កាត់ ០.៥ ពីកញ្ចប់។</span></p>
       </div>
     </section>
 
@@ -94,7 +96,7 @@
         <div class="row">
           <div><label>Package * <span class="km">កញ្ចប់</span></label>
             <select id="pType"><option value="">—</option><option>Single Session</option><option>2-Session</option><option>3-Session</option><option>4-Session</option><option>5-Session</option><option>6-Session</option><option>8-Session</option><option>10-Session</option><option>Other</option></select></div>
-          <div><label>Sessions * <span class="km">ចំនួនវគ្គព្យាបាល</span></label><input id="sessions" type="number" min="1" inputmode="numeric"></div>
+          <div><label>Sessions * <span class="km">ចំនួនវគ្គព្យាបាល</span></label><input id="sessions" type="number" min="0.5" step="0.5" inputmode="decimal"></div>
         </div>
         <div class="row">
           <div><label>Price $ (full) * <span class="km">តម្លៃពេញ</span></label><input id="price" type="number" min="0" step="0.01" inputmode="decimal"></div>
@@ -360,12 +362,12 @@ $('review').onclick = () => {
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   payload = { form: 'record', phone, name, date: $('date').value, enteredBy: $('enteredBy').value,
-    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '' },
+    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', half: $('half').checked },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
     payment: selling ? (credit && credit.payWithCredit ? 'Homecare Credit' : $('payment').value) : '', credit,
     k: (() => { try { return localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
-  html += payload.today ? `<br>🩺 <b>${tt}</b> · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
+  html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.half ? ' · <b>½ HALF session (counts 0.5)</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
   if (bought) {
     const t = Number(bought.price) - (Number(bought.discountAmount) || 0); total += t;
@@ -400,7 +402,7 @@ $('again').onclick = () => {
   ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
   $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
   document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); $('fromBox').classList.remove('hidden');
-  $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null;
+  $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null; $('half').checked = false;
   document.querySelector('input[name=bfor][value=own]').checked = true; $('bSharedBox').classList.add('hidden');
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
