@@ -84,8 +84,16 @@
           <label>Shared sessions of (payer's name) <span class="km">ប្រើវគ្គព្យាបាលរួមជាមួយ (ឈ្មោះអ្នកបង់)</span></label>
           <input id="payer" type="text" autocomplete="off">
         </div>
-        <label class="toggle" style="margin-top:12px"><input id="half" type="checkbox"> ½ Half session (Specialist's advice) · <span class="km">វគ្គព្យាបាលពាក់កណ្តាល (តាមការណែនាំរបស់អ្នកជំនាញ)</span></label>
-        <p class="hint">Tick only when the Specialist did half a session today. It counts 0.5 from the package. <span class="km">ធីកតែពេលអ្នកជំនាញធ្វើពាក់កណ្តាលវគ្គ។ កាត់ ០.៥ ពីកញ្ចប់។</span></p>
+        <label style="margin-top:12px">Sessions used today (Specialist's advice) <span class="km">ចំនួនវគ្គប្រើថ្ងៃនេះ (តាមការណែនាំរបស់អ្នកជំនាញ)</span></label>
+        <div class="radios" style="flex-wrap:wrap">
+          <label><input type="radio" name="units" value="0.5"> ½</label>
+          <label><input type="radio" name="units" value="1" checked> 1</label>
+          <label><input type="radio" name="units" value="1.5"> 1½</label>
+          <label><input type="radio" name="units" value="2"> 2</label>
+          <label><input type="radio" name="units" value="2.5"> 2½</label>
+          <label><input type="radio" name="units" value="3"> 3</label>
+        </div>
+        <p class="hint">Normal visit = 1 (leave it). Change it only when the Specialist did half a session, or more than one (e.g. face + back acne). Not enough sessions left? Add the extra in "Sessions bought today". <span class="km">ធម្មតា = ១ (មិនបាច់ប្តូរ)។ ប្តូរតែពេលអ្នកជំនាញធ្វើពាក់កណ្តាលវគ្គ ឬច្រើនជាង ១ វគ្គ។ បើវគ្គនៅសល់មិនគ្រប់ សូមបន្ថែមក្នុង "វគ្គព្យាបាលដែលទិញថ្ងៃនេះ"។</span></p>
       </div>
     </section>
 
@@ -229,6 +237,7 @@ const forVal = () => (document.querySelector('input[name=bfor]:checked') || {}).
 document.querySelectorAll('input[name=bfor]').forEach(r => r.onchange = () => $('bSharedBox').classList.toggle('hidden', forVal() !== 'shared'));
 // Sub-client (has a master client): preselect Shared and fill the payer from the CRM
 let lk = null;
+const unitsVal = () => { const r = document.querySelector('input[name="units"]:checked'); return r ? Number(r.value) : 1; };
 document.addEventListener('u2be:client', (ev) => {
   lk = ev.detail || null;
   const m = lk && lk.master ? String(lk.master) : '';
@@ -362,12 +371,12 @@ $('review').onclick = () => {
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   payload = { form: 'record', phone, name, date: $('date').value, enteredBy: $('enteredBy').value,
-    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', half: $('half').checked },
+    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5 },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
     payment: selling ? (credit && credit.payWithCredit ? 'Homecare Credit' : $('payment').value) : '', credit,
     k: (() => { try { return localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
-  html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.half ? ' · <b>½ HALF session (counts 0.5)</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
+  html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
   if (bought) {
     const t = Number(bought.price) - (Number(bought.discountAmount) || 0); total += t;
@@ -402,7 +411,7 @@ $('again').onclick = () => {
   ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
   $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
   document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); $('fromBox').classList.remove('hidden');
-  $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null; $('half').checked = false;
+  $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null; document.querySelector('input[name="units"][value="1"]').checked = true;
   document.querySelector('input[name=bfor][value=own]').checked = true; $('bSharedBox').classList.add('hidden');
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
