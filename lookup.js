@@ -9,11 +9,15 @@
   try {
     if (m) {
       localStorage.setItem(LS, m[1]);
+      if (localStorage.getItem(LS) !== m[1]) throw new Error('not saved'); // keep the code in the address if it cannot be saved
       var qs = location.search.replace(/([?&])k=[^&]*&?/, '$1').replace(/[?&]$/, '');
       history.replaceState(null, '', location.pathname + qs);
     }
     key = localStorage.getItem(LS) || '';
   } catch (e) { key = m ? m[1] : ''; }
+  // Keep the code in the page too: on some tablets / in-app browsers the saved copy is lost,
+  // and the form then sent without it (every entry flagged "no staff code").
+  window.u2beStaffKey = key || (m ? m[1] : '');
 
   var phone = document.getElementById('phone'), name = document.getElementById('name');
   if (!phone || !name) return;
@@ -35,7 +39,8 @@
       var c = (document.getElementById('lkCode').value || '').trim().toLowerCase();
       if (!c) return;
       try { localStorage.setItem(LS, c); } catch (e) {}
-      location.reload();
+      window.u2beStaffKey = c;
+      try { location.reload(); } catch (e) {}
     };
     return;
   }

@@ -374,7 +374,7 @@ $('review').onclick = () => {
     today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5 },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
     payment: selling ? (credit && credit.payWithCredit ? 'Homecare Credit' : $('payment').value) : '', credit,
-    k: (() => { try { return localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return ''; } })() };
+    k: (() => { try { return window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beStaffKey || ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
   html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
@@ -421,6 +421,6 @@ $('again').onclick = () => {
   show('formView'); window.scrollTo(0,0);
 };
 </script>
-<script src="./lookup.js?v=9"></script>
+<script src="./lookup.js?v=10"></script>
 </body>
 </html>
