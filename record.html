@@ -158,6 +158,10 @@
         <label class="toggle" style="margin-top:14px"><input id="payCredit" type="checkbox"> Products today paid with credit · <span class="km">ទូទាត់ផលិតផលដោយក្រេឌីត</span></label>
         <div id="pcBox" class="hidden">
           <p class="hint">No discount when paying with credit. Add the products above. <span class="km">គ្មានបញ្ចុះតម្លៃ។ បញ្ចូលផលិតផលខាងលើ។</span></p>
+          <p class="hint" id="creditCalc" style="font-size:14px;color:inherit"></p>
+          <label>Credit used today $ * <span class="km">ក្រេឌីតប្រើថ្ងៃនេះ</span></label>
+          <input id="creditUsed" type="number" min="0" step="0.01" inputmode="decimal">
+          <p class="hint">Filled automatically: all credit left, up to the products total. The rest is paid Cash / QR (choose Payment under Receipt). <span class="km">ប្រើក្រេឌីតទាំងអស់មុន — នៅសល់បង់ Cash / QR។</span></p>
           <label>Whose credit? <span class="km">ក្រេឌីតរបស់អ្នកណា?</span></label>
           <div class="radios">
             <label><input type="radio" name="cowner" value="self" checked> This client · <span class="km">អតិថិជននេះ</span></label>
@@ -269,8 +273,39 @@ document.querySelectorAll('input[name=topup]').forEach((r) => r.onchange = () =>
   else $('topupCalc').textContent = '';
   syncSale();
 });
-$('payCredit').onchange = () => { $('pcBox').classList.toggle('hidden', !$('payCredit').checked); lockDisc(); };
-document.querySelectorAll('input[name=cowner]').forEach((r) => r.onchange = () => $('buyerBox').classList.toggle('hidden', ownerVal() !== 'buyer'));
+$('payCredit').onchange = () => { $('pcBox').classList.toggle('hidden', !$('payCredit').checked); lockDisc(); calcCredit(); };
+document.querySelectorAll('input[name=cowner]').forEach((r) => r.onchange = () => { $('buyerBox').classList.toggle('hidden', ownerVal() !== 'buyer'); calcCredit(); });
+// v26 Oct 2026 — split payment: use all credit first, the rest Cash / QR.
+const productsTotal = () => [...$('items').children].reduce((a, d) => a + (Number(d.querySelector('.qty').value) || 0) * (Number(d.querySelector('.price').value) || 0), 0);
+const topupCredit = () => { const v = topVal(); if (!v) return 0; const [p, b] = v.split('|').map(Number); return p + p * b / 100; };
+// Credit the client has before today's purchase (POS balance from the lookup + any credit bought today). null = unknown (family buyer, client not found).
+const creditAvail = () => {
+  if (ownerVal() === 'buyer') return null;
+  if (!lk) return topVal() ? topupCredit() : null;
+  return Math.round(((Number(lk.credit) || 0) + topupCredit()) * 100) / 100;
+};
+const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
+function calcCredit() {
+  if (!($('hasC').checked && $('payCredit').checked)) { $('creditCalc').textContent = ''; return; }
+  const total = r2(productsTotal()), avail = creditAvail();
+  if ($('creditUsed').dataset.manual !== '1') $('creditUsed').value = total ? (avail === null ? total : Math.min(total, avail)).toFixed(2) : '';
+  const used = r2($('creditUsed').value), rest = r2(total - used);
+  if (avail !== null && $('posBal').dataset.manual !== '1') $('posBal').value = Math.max(0, r2(avail - used)).toFixed(2);
+  let h = `🧴 Products ${money(total)}`;
+  h += avail === null ? ' · 💳 credit left: <b>check the POS</b>' : ` · 💳 credit left <b>${money(avail)}</b>`;
+  h += `<br>Pay with credit <b>${money(used)}</b>`;
+  if (rest > 0) h += ` + <b>${money(rest)}</b> Cash / QR <span style="color:#C0392B">→ choose Payment</span>`;
+  if (avail !== null && avail <= 0) h += '<br><span style="color:#C0392B">⚠ No credit left — untick "paid with credit" and take Cash / QR.</span>';
+  h += ' <span class="km">· ក្រេឌីតមុន នៅសល់បង់ Cash / QR</span>';
+  $('creditCalc').innerHTML = h;
+}
+$('creditUsed').addEventListener('input', () => { $('creditUsed').dataset.manual = '1'; calcCredit(); });
+$('posBal').addEventListener('input', () => { $('posBal').dataset.manual = '1'; });
+$('items').addEventListener('input', calcCredit);
+$('items').addEventListener('click', () => setTimeout(calcCredit, 0));
+document.addEventListener('u2be:client', () => setTimeout(calcCredit, 0));
+document.querySelectorAll('input[name=topup]').forEach((r) => r.addEventListener('change', calcCredit));
+$('hasC').addEventListener('change', calcCredit);
 $('pType').onchange = () => { const m = SIZES[$('pType').value]; if (m) $('sessions').value = m; else { $('sessions').value = ''; $('sessions').focus(); } };
 const bDisc = () => autoDiscount($('disc'), $('discAmt'), () => Number($('price').value) || 0);
 $('disc').addEventListener('change', bDisc);
@@ -357,8 +392,18 @@ $('review').onclick = () => {
       if (!$('buyerOk').checked) e.push('Buyer confirmed · អ្នកទិញយល់ព្រម');
     }
     if ($('posBal').value === '') e.push('Credit balance after (POS receipt) · ក្រេឌីតនៅសល់');
+    let used = 0, rest = 0;
+    if (pc) {
+      const total = r2(productsTotal()); used = r2($('creditUsed').value); rest = r2(total - used);
+      const avail = creditAvail();
+      if (!(used > 0)) e.push('Credit used today · ក្រេឌីតប្រើថ្ងៃនេះ');
+      if (used > total + 0.001) e.push('Credit used is more than the products total · ក្រេឌីតលើសតម្លៃផលិតផល');
+      if (avail !== null && used > avail + 0.001) e.push(`Credit used is more than the credit left (${money(avail)}) · ក្រេឌីតមិនគ្រប់`);
+      if (rest > 0 && !$('payment').value) e.push(`Payment for the rest ${money(rest)} (Cash / QR) · បង់នៅសល់`);
+    }
     const [tp, tb] = tv ? tv.split('|').map(Number) : [0, 0];
     credit = { topup: tv ? { paid: tp, bonusPct: tb, payment: $('topPay').value } : null, payWithCredit: pc,
+      used: pc ? used : null, rest: pc ? rest : 0, restPay: pc && rest > 0 ? $('payment').value : '',
       owner: pc ? ownerVal() : 'self', buyerPhone: $('buyerPhone').value.trim(), buyerName: $('buyerName').value.trim(),
       buyerConfirmed: $('buyerOk').checked, posBalance: $('posBal').value };
   }
@@ -373,7 +418,7 @@ $('review').onclick = () => {
   payload = { form: 'record', phone, name, date: $('date').value, enteredBy: $('enteredBy').value,
     today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5 },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
-    payment: selling ? (credit && credit.payWithCredit ? 'Homecare Credit' : $('payment').value) : '', credit,
+    payment: selling ? (credit && credit.payWithCredit && !(credit.rest > 0) ? 'Homecare Credit' : $('payment').value) : '', sessionPayment: $('payment').value, credit,
     k: (() => { try { return window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beStaffKey || ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
   html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
@@ -389,11 +434,11 @@ $('review').onclick = () => {
   if (credit) {
     if (credit.topup) { const c = credit.topup.paid * (1 + credit.topup.bonusPct / 100); total += credit.topup.paid;
       html += `<br>💳 <b>Buy credit</b> ${money(credit.topup.paid)} + ${credit.topup.bonusPct}% = <b>${money(c)} credit</b> · paid ${credit.topup.payment}<br>`; }
-    if (credit.payWithCredit) { const sp = products.reduce((a, p) => a + Number(p.qty) * Number(p.unitPrice), 0); total -= sp;
-      html += `<br>💳 Products paid with credit: <b>−${money(sp)}</b> from ${credit.owner === 'buyer' ? 'buyer ' + (credit.buyerName || credit.buyerPhone) + (credit.buyerConfirmed ? ' ✅ confirmed' : '') : 'this client'}<br>`; }
+    if (credit.payWithCredit) { total -= credit.used;
+      html += `<br>💳 Paid with credit: <b>−${money(credit.used)}</b> from ${credit.owner === 'buyer' ? 'buyer ' + (credit.buyerName || credit.buyerPhone) + (credit.buyerConfirmed ? ' ✅ confirmed' : '') : 'this client'}${credit.rest > 0 ? ` · rest <b>${money(credit.rest)}</b> by <b>${credit.restPay}</b>` : ''}<br>`; }
     html += `💳 Credit balance after (POS): <b>${money(credit.posBalance)}</b><br>`;
   }
-  if (selling) html += `<br>Receipt <b>${receipt}</b> · Closed by ${payload.closedBy}${payload.payment ? ' · ' + payload.payment : ''}<div class="total">Total today · សរុបថ្ងៃនេះ ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
+  if (selling) html += `<br>Receipt <b>${receipt}</b> · Closed by ${payload.closedBy}${payload.payment ? ' · ' + payload.payment : ''}<div class="total">Cash / QR today · សរុបបង់ថ្ងៃនេះ ${money(total)}</div><div class="sub" style="margin-top:6px">Must match the POS receipt. · ត្រូវតែដូចវិក្កយបត្រ POS។</div>`;
   $('summary').innerHTML = html;
   show('confirmView'); window.scrollTo(0,0);
 };
@@ -416,7 +461,7 @@ $('again').onclick = () => {
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
   $('hasC').checked = false; $('payCredit').checked = false; $('buyerOk').checked = false; ['cBox','pcBox','buyerBox','topPayBox'].forEach(id => $(id).classList.add('hidden'));
-  ['buyerPhone','buyerName','posBal','topPay'].forEach(id => $(id).value = ''); $('topupCalc').textContent = '';
+  ['buyerPhone','buyerName','posBal','topPay','creditUsed'].forEach(id => { $(id).value = ''; $(id).dataset.manual = ''; }); $('topupCalc').textContent = ''; $('creditCalc').textContent = '';
   document.querySelector('input[name=topup][value=""]').checked = true; document.querySelector('input[name=cowner][value=self]').checked = true; lockDisc();
   show('formView'); window.scrollTo(0,0);
 };
