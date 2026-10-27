@@ -159,6 +159,13 @@
         <div id="pcBox" class="hidden">
           <p class="hint">No discount when paying with credit. Add the products above. <span class="km">គ្មានបញ្ចុះតម្លៃ។ បញ្ចូលផលិតផលខាងលើ។</span></p>
           <p class="hint" id="creditCalc" style="font-size:14px;color:inherit"></p>
+          <div id="restBox" class="hidden" style="margin-top:8px;padding:10px;border:2px solid #C0392B;border-radius:10px">
+            <label>Rest <b id="restAmt"></b> paid by * <span class="km">នៅសល់បង់ដោយ</span></label>
+            <div class="radios">
+              <label><input type="radio" name="restPay" value="Cash"> Cash</label>
+              <label><input type="radio" name="restPay" value="QR"> QR</label>
+            </div>
+          </div>
           <label>Credit used today $ * <span class="km">ក្រេឌីតប្រើថ្ងៃនេះ</span></label>
           <input id="creditUsed" type="number" min="0" step="0.01" inputmode="decimal">
           <p class="hint">Filled automatically: all credit left, up to the products total. The rest is paid Cash / QR (choose Payment under Receipt). <span class="km">ប្រើក្រេឌីតទាំងអស់មុន — នៅសល់បង់ Cash / QR។</span></p>
@@ -286,7 +293,7 @@ const creditAvail = () => {
 };
 const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 function calcCredit() {
-  if (!($('hasC').checked && $('payCredit').checked)) { $('creditCalc').textContent = ''; return; }
+  if (!($('hasC').checked && $('payCredit').checked)) { $('creditCalc').textContent = ''; $('restBox').classList.add('hidden'); return; }
   const total = r2(productsTotal()), avail = creditAvail();
   if ($('creditUsed').dataset.manual !== '1') $('creditUsed').value = total ? (avail === null ? total : Math.min(total, avail)).toFixed(2) : '';
   const used = r2($('creditUsed').value), rest = r2(total - used);
@@ -294,11 +301,17 @@ function calcCredit() {
   let h = `🧴 Products ${money(total)}`;
   h += avail === null ? ' · 💳 credit left: <b>check the POS</b>' : ` · 💳 credit left <b>${money(avail)}</b>`;
   h += `<br>Pay with credit <b>${money(used)}</b>`;
-  if (rest > 0) h += ` + <b>${money(rest)}</b> Cash / QR <span style="color:#C0392B">→ choose Payment</span>`;
+  if (rest > 0) h += ` + <b>${money(rest)}</b> Cash / QR`;
   if (avail !== null && avail <= 0) h += '<br><span style="color:#C0392B">⚠ No credit left — untick "paid with credit" and take Cash / QR.</span>';
   h += ' <span class="km">· ក្រេឌីតមុន នៅសល់បង់ Cash / QR</span>';
   $('creditCalc').innerHTML = h;
+  $('restBox').classList.toggle('hidden', !(rest > 0));
+  $('restAmt').textContent = money(rest);
+  const rv = $('payment').value; document.querySelectorAll('input[name=restPay]').forEach((r) => { r.checked = r.value === rv; });
 }
+// Cash / QR buttons in the credit box = the Payment dropdown under Receipt (kept in step both ways)
+document.querySelectorAll('input[name=restPay]').forEach((r) => r.addEventListener('change', () => { if (r.checked) $('payment').value = r.value; }));
+$('payment').addEventListener('change', () => { document.querySelectorAll('input[name=restPay]').forEach((r) => { r.checked = r.value === $('payment').value; }); });
 $('creditUsed').addEventListener('input', () => { $('creditUsed').dataset.manual = '1'; calcCredit(); });
 $('posBal').addEventListener('input', () => { $('posBal').dataset.manual = '1'; });
 $('items').addEventListener('input', calcCredit);
@@ -399,7 +412,7 @@ $('review').onclick = () => {
       if (!(used > 0)) e.push('Credit used today · ក្រេឌីតប្រើថ្ងៃនេះ');
       if (used > total + 0.001) e.push('Credit used is more than the products total · ក្រេឌីតលើសតម្លៃផលិតផល');
       if (avail !== null && used > avail + 0.001) e.push(`Credit used is more than the credit left (${money(avail)}) · ក្រេឌីតមិនគ្រប់`);
-      if (rest > 0 && !$('payment').value) e.push(`Payment for the rest ${money(rest)} (Cash / QR) · បង់នៅសល់`);
+      if (rest > 0 && !$('payment').value) e.push(`Rest ${money(rest)} paid by Cash / QR · នៅសល់បង់ដោយ`);
     }
     const [tp, tb] = tv ? tv.split('|').map(Number) : [0, 0];
     credit = { topup: tv ? { paid: tp, bonusPct: tb, payment: $('topPay').value } : null, payWithCredit: pc,
