@@ -184,7 +184,7 @@ $('review').onclick = () => {
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   const d = new Date(); const today = new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10);
   payload = { form: 'backfill', phone, name, date: today, enteredBy: $('enteredBy').value, packages, credit,
-    k: (() => { try { return window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beStaffKey || ''; } })() };
+    k: (() => { try { return window.u2beFormCode || localStorage.getItem('u2be_formcode') || window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beFormCode || window.u2beStaffKey || ''; } })() };
   let html = `<b>${esc(name)}</b> · ${esc(phone)}<br>Entered by ${esc(payload.enteredBy)}<br>`;
   packages.forEach((p, i) => {
     const left = Number(p.sessions) - Number(p.used);
@@ -210,6 +210,6 @@ $('send').onclick = async () => {
 };
 $('again').onclick = () => { $('phone').value = ''; $('name').value = ''; $('hasC').checked = false; $('cBox').classList.add('hidden'); $('cBal').value = ''; $('cNote').value = ''; $('pkgs').innerHTML = ''; addPkg(); payload = null; show('formView'); window.scrollTo(0,0); };
 </script>
-<script src="./lookup.js?v=10"></script>
+<script src="./lookup.js?v=11"></script>
 </body>
 </html>

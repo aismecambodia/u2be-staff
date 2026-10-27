@@ -149,6 +149,11 @@
           <label><input type="radio" name="topup" value="" checked> No · <span class="km">ទេ</span></label>
           <label><input type="radio" name="topup" value="300|10"> $300 (+10%)</label>
           <label><input type="radio" name="topup" value="500|15"> $500 (+15%)</label>
+          <label><input type="radio" name="topup" value="other"> Other · <span class="km">ផ្សេងទៀត</span></label>
+        </div>
+        <div id="topOtherBox" class="hidden row">
+          <div><label>Amount paid $ * <span class="km">ចំនួនបង់</span></label><input id="topAmt" type="number" min="1" step="0.01" inputmode="decimal"></div>
+          <div><label>Credit bonus % <span class="km">ក្រេឌីតបន្ថែម</span></label><input id="topPct" type="number" min="0" max="15" step="0.5" inputmode="decimal" placeholder="0"></div>
         </div>
         <p class="hint" id="topupCalc"></p>
         <div id="topPayBox" class="hidden">
@@ -240,7 +245,14 @@ const LS = 'u2be_enteredBy';
 $('date').value = today();
 try { const v = localStorage.getItem(LS); if (v) $('enteredBy').value = v; } catch (e) {}
 const fromVal = () => (document.querySelector('input[name=from]:checked') || {}).value || 'Own';
-const topVal = () => (document.querySelector('input[name=topup]:checked') || {}).value || '';
+const topVal = () => {
+  const v = (document.querySelector('input[name=topup]:checked') || {}).value || '';
+  if (v !== 'other') return v;
+  // Other top-up (26 Oct 2026): any amount, bonus 0–15% (0 = no bonus)
+  const amt = Math.round((Number($('topAmt').value) || 0) * 100) / 100, pct = Number($('topPct').value) || 0;
+  return amt > 0 ? `${amt}|${pct}` : '';
+};
+const topOther = () => ((document.querySelector('input[name=topup]:checked') || {}).value || '') === 'other';
 const syncSale = () => $('saleBox').classList.toggle('hidden', !($('hasB').checked || $('hasP').checked || ($('hasC').checked && topVal())));
 $('tType').onchange = () => $('fromBox').classList.toggle('hidden', $('tType').value === 'none');
 document.querySelectorAll('input[name=from]').forEach(r => r.onchange = () => $('payerBox').classList.toggle('hidden', fromVal() !== 'Shared'));
@@ -274,12 +286,14 @@ const lockDisc = () => {
     if (on) { t.value = 'None'; a.value = ''; } t.disabled = on; a.disabled = on; });
 };
 $('hasC').onchange = () => { $('cBox').classList.toggle('hidden', !$('hasC').checked); lockDisc(); syncSale(); };
-document.querySelectorAll('input[name=topup]').forEach((r) => r.onchange = () => {
-  const v = topVal(); $('topPayBox').classList.toggle('hidden', !v);
+const onTopup = () => {
+  const v = topVal(); $('topOtherBox').classList.toggle('hidden', !topOther()); $('topPayBox').classList.toggle('hidden', !v && !topOther());
   if (v) { const [p, b] = v.split('|').map(Number); $('topupCalc').innerHTML = `Paid $${p} + bonus ${b}% ($${(p * b / 100).toFixed(2)}) = <b>credit $${(p + p * b / 100).toFixed(2)}</b> · <span class="km">ក្រេឌីតសរុប</span>`; }
   else $('topupCalc').textContent = '';
-  syncSale();
-});
+  syncSale(); if (typeof calcCredit === 'function') calcCredit();
+};
+document.querySelectorAll('input[name=topup]').forEach((r) => r.onchange = onTopup);
+['topAmt', 'topPct'].forEach((id) => $(id).addEventListener('input', onTopup));
 $('payCredit').onchange = () => { $('pcBox').classList.toggle('hidden', !$('payCredit').checked); lockDisc(); calcCredit(); };
 document.querySelectorAll('input[name=cowner]').forEach((r) => r.onchange = () => { $('buyerBox').classList.toggle('hidden', ownerVal() !== 'buyer'); calcCredit(); });
 // v26 Oct 2026 — split payment: use all credit first, the rest Cash / QR.
@@ -397,7 +411,9 @@ $('review').onclick = () => {
   let credit = null;
   if ($('hasC').checked) {
     const tv = topVal(), pc = $('payCredit').checked;
-    if (!tv && !pc) e.push('Credit: choose Buy credit or Products paid with credit · ក្រេឌីត');
+    if (topOther() && !tv) e.push('Top-up Other: amount paid · ចំនួនបង់');
+    if (topOther() && ((Number($('topPct').value) || 0) < 0 || (Number($('topPct').value) || 0) > 15)) e.push('Credit bonus: 0–15% · ក្រេឌីតបន្ថែម 0–15%');
+    if (!tv && !pc && !topOther()) e.push('Credit: choose Buy credit or Products paid with credit · ក្រេឌីត');
     if (tv && !$('topPay').value) e.push('Credit paid by · បង់ដោយ');
     if (pc && !products.length) e.push('Credit: add the products (Products bought today) · បញ្ចូលផលិតផល');
     if (pc && ownerVal() === 'buyer') {
@@ -432,7 +448,7 @@ $('review').onclick = () => {
     today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5 },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
     payment: selling ? (credit && credit.payWithCredit && !(credit.rest > 0) ? 'Homecare Credit' : $('payment').value) : '', sessionPayment: $('payment').value, credit,
-    k: (() => { try { return window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beStaffKey || ''; } })() };
+    k: (() => { try { return window.u2beFormCode || localStorage.getItem('u2be_formcode') || window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beFormCode || window.u2beStaffKey || ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
   html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
@@ -474,11 +490,11 @@ $('again').onclick = () => {
   $('hasB').checked = false; $('hasP').checked = false; ['bBox','pBox','saleBox'].forEach(id => $(id).classList.add('hidden'));
   $('items').innerHTML = ''; $('addItem').classList.remove('hidden'); payload = null;
   $('hasC').checked = false; $('payCredit').checked = false; $('buyerOk').checked = false; ['cBox','pcBox','buyerBox','topPayBox'].forEach(id => $(id).classList.add('hidden'));
-  ['buyerPhone','buyerName','posBal','topPay','creditUsed'].forEach(id => { $(id).value = ''; $(id).dataset.manual = ''; }); $('topupCalc').textContent = ''; $('creditCalc').textContent = '';
-  document.querySelector('input[name=topup][value=""]').checked = true; document.querySelector('input[name=cowner][value=self]').checked = true; lockDisc();
+  ['buyerPhone','buyerName','posBal','topPay','creditUsed','topAmt','topPct'].forEach(id => { $(id).value = ''; $(id).dataset.manual = ''; }); $('topupCalc').textContent = ''; $('creditCalc').textContent = '';
+  document.querySelector('input[name=topup][value=""]').checked = true; $('topOtherBox').classList.add('hidden'); document.querySelector('input[name=cowner][value=self]').checked = true; lockDisc();
   show('formView'); window.scrollTo(0,0);
 };
 </script>
-<script src="./lookup.js?v=10"></script>
+<script src="./lookup.js?v=11"></script>
 </body>
 </html>

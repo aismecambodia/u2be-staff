@@ -18,6 +18,15 @@
   // Keep the code in the page too: on some tablets / in-app browsers the saved copy is lost,
   // and the form then sent without it (every entry flagged "no staff code").
   window.u2beStaffKey = key || (m ? m[1] : '');
+  // Form code (26 Oct 2026): the lookup sends back the code the Airtable automation accepts.
+  // Saved apart from the lookup key, so an old code on a tablet is replaced by itself.
+  var FC = 'u2be_formcode';
+  try { window.u2beFormCode = localStorage.getItem(FC) || ''; } catch (e) { window.u2beFormCode = window.u2beFormCode || ''; }
+  function saveFormCode(j) {
+    if (!j || !j.fc || !/^[A-Za-z0-9_-]{4,40}$/.test(j.fc)) return;
+    window.u2beFormCode = j.fc;
+    try { localStorage.setItem(FC, j.fc); } catch (e) {}
+  }
 
   var phone = document.getElementById('phone'), name = document.getElementById('name');
   if (!phone || !name) return;
@@ -64,6 +73,7 @@
     fetch(API + '?phone=' + encodeURIComponent(d), { headers: { 'X-Staff-Key': key } })
       .then(function (r) { if (r.status === 403) throw new Error('403'); return r.json(); })
       .then(function (j) {
+        saveFormCode(j);
         if (digits(phone.value) !== d) return;
         try { document.dispatchEvent(new CustomEvent('u2be:client', { detail: j.found === 1 ? j : null })); } catch (x) {}
         if (j.found === 1) {
@@ -96,6 +106,7 @@
     fetch(API + '?name=' + encodeURIComponent(q), { headers: { 'X-Staff-Key': key } })
       .then(function (r) { return r.json(); })
       .then(function (j) {
+        saveFormCode(j);
         if (name.value.toLowerCase().replace(/[^a-z0-9\u1780-\u17ff]/g, '') !== q) return;
         var items = (j && j.list) || [];
         if (!items.length) { list.innerHTML = '<p class="hint">No client found with this name — type the phone. · រកមិនឃើញ — សូមវាយលេខទូរស័ព្ទ</p>'; list.style.display = 'block'; return; }
