@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Appointment Update · U2BE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+Khmer:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--rose:#E46A8C;--sage:#A8C3A0;--white:#F8F8F6;--charcoal:#2B2B2B;--muted:#6b6b6b;--line:#e2e2dd;--err:#C0392B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--white);color:var(--charcoal);font-family:Inter,"Noto Sans Khmer",system-ui,sans-serif}
+  main{max-width:520px;margin:0 auto;padding:20px 16px 48px}
+  .km{font-family:"Noto Sans Khmer",Inter,sans-serif}
+  a.back{color:var(--muted);text-decoration:none;font-size:14px}
+  h1{font-size:23px;margin:12px 0 2px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+  section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+  h2{font-size:16px;margin:0 0 12px}
+  label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+  label .km{font-weight:400;color:var(--muted)}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;padding:11px 12px;border:1px solid #cfcfca;border-radius:10px;background:#fff;color:var(--charcoal)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--rose);border-color:transparent}
+  .client{font-size:17px;font-weight:700}
+  .meta{color:var(--muted);font-size:14px;margin-top:4px}
+  .acts{display:grid;gap:10px}
+  .act{display:flex;align-items:center;gap:12px;text-align:left;width:100%;background:#fff;border:2px solid var(--line);border-radius:12px;padding:14px;font:inherit;cursor:pointer;color:var(--charcoal)}
+  .act .i{font-size:24px;flex:none}
+  .act b{display:block;font-size:16px}
+  .act span.km{font-size:14px;color:var(--muted)}
+  .act.on{border-color:var(--rose);background:#fdf1f4}
+  .btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-size:17px;font-weight:700;cursor:pointer;background:var(--rose);color:#fff}
+  .btn:disabled{opacity:.5}
+  .hidden{display:none}
+  .err{color:var(--err);font-size:14px;margin:10px 0}
+  .hint{color:var(--muted);font-size:12px;margin:4px 0 0}
+  .warn{background:#fbecea;border-left:5px solid var(--err);color:#7a2318;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+  .ok{text-align:center;padding:40px 10px}
+  .ok .big{font-size:48px}
+</style>
+</head>
+<body>
+<main>
+  <a class="back" href="./">‹ Staff menu · <span class="km">ម៉ឺនុយបុគ្គលិក</span></a>
+
+  <div id="noAppt" class="hidden">
+    <h1>Appointment Update</h1>
+    <div class="warn">Open this form from the appointment card: tap <b>Update</b> in the Front Desk app.<br><span class="km">សូមបើកពីកាតណាត់ជួប៖ ចុច <b>Update</b> ក្នុង App Front Desk។</span></div>
+  </div>
+
+  <div id="formView" class="hidden">
+    <h1>Appointment Update <span class="km">· កែប្រែការណាត់ជួប</span></h1>
+    <p class="sub">For appointments not yet done. The visit itself is recorded with the Client Record. <span class="km">សម្រាប់ការណាត់ដែលមិនទាន់ធ្វើ។ ការមកធ្វើ សូមកត់ក្នុង Client Record។</span></p>
+
+    <section>
+      <div class="client" id="cName">—</div>
+      <div class="meta" id="cMeta"></div>
+    </section>
+
+    <section>
+      <h2>What happened? <span class="km">មានអ្វីកើតឡើង?</span></h2>
+      <div class="acts">
+        <button type="button" class="act" data-a="reconfirmed"><span class="i">✅</span><span><b>Reconfirmed — client will come</b><span class="km">បានបញ្ជាក់ — អតិថិជននឹងមក</span></span></button>
+        <button type="button" class="act" data-a="reschedule"><span class="i">📅</span><span><b>Change date</b><span class="km">ប្តូរថ្ងៃណាត់</span></span></button>
+        <button type="button" class="act" data-a="noshow"><span class="i">❌</span><span><b>Did not come / cancelled / not reachable</b><span class="km">មិនបានមក / បោះបង់ / ទាក់ទងមិនបាន</span></span></button>
+      </div>
+
+      <div id="reasonBox" class="hidden">
+        <label>Reason <span class="km">មូលហេតុ</span></label>
+        <select id="reason"><option value="notcome">Did not come · មិនបានមក</option><option value="cancelled">Cancelled by client · អតិថិជនបោះបង់</option><option value="unreachable">Not reachable · ទាក់ទងមិនបាន</option></select>
+      </div>
+
+      <div id="dateBox" class="hidden">
+        <label id="dateLbl">New date <span class="km">ថ្ងៃណាត់ថ្មី</span></label>
+        <input id="newDate" type="date">
+        <p class="hint" id="dateHint"></p>
+      </div>
+
+      <label>Note (optional) <span class="km">កំណត់សម្គាល់ (បើមាន)</span></label>
+      <textarea id="note" rows="2" placeholder="e.g. client asked for afternoon"></textarea>
+
+      <label>Updated by <span class="km">អ្នកកែ</span></label>
+      <select id="enteredBy"><option value="">—</option><option>Chansophal</option><option>Sonita</option><option>Manet</option><option>Receptionist</option><option>Nateng Nao Sim</option><option>Kimhong</option><option>Arifin</option><option>Other</option></select>
+    </section>
+
+    <div id="err" class="err"></div>
+    <button class="btn" id="send" type="button">Save · រក្សាទុក</button>
+    <p class="hint" style="text-align:center;margin-top:10px">Saved straight into Airtable. Never use this when the client came — use Client Record. <span class="km">រក្សាទុកដោយផ្ទាល់។ បើអតិថិជនបានមក សូមប្រើ Client Record។</span></p>
+  </div>
+
+  <div id="done" class="ok hidden">
+    <div class="big">✅</div>
+    <h1>Saved · <span class="km">បានរក្សាទុក</span></h1>
+    <p id="doneText" class="sub" style="margin-top:8px"></p>
+    <p class="sub">Airtable updates within a minute. Close this page. <span class="km">Airtable នឹងប្តូរក្នុងរយៈពេលមួយនាទី។ បិទទំព័រនេះបាន។</span></p>
+  </div>
+</main>
+<script src="./lookup.js?v=9"></script>
+<script>
+const HOOK = 'https://hooks.airtable.com/workflows/v1/genericWebhook/appgfLBxP1D2cYKAH/wflS5v0qw0P9PRBiH/wtrV6QN9HFAFZ9UaP';
+const $ = (id) => document.getElementById(id);
+const P = new URLSearchParams(location.search);
+const appt = P.get('appt') || '';
+const today = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10); // Phnom Penh
+const fmt = (s) => { try { const d = new Date(s + 'T00:00:00'); return d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); } catch (e) { return s; } };
+let action = '';
+
+if (!/^rec[A-Za-z0-9]{14}$/.test(appt)) {
+  $('noAppt').classList.remove('hidden');
+} else {
+  $('formView').classList.remove('hidden');
+  $('cName').textContent = P.get('name') || 'Client';
+  const d = P.get('date') || '';
+  $('cMeta').textContent = [d ? 'Appointment: ' + fmt(d) + (d === today ? ' (today)' : '') : '', P.get('type') || ''].filter(Boolean).join(' · ');
+  $('newDate').min = today;
+}
+try { const v = localStorage.getItem('u2be_enteredBy'); if (v) $('enteredBy').value = v; } catch (e) {}
+
+document.querySelectorAll('.act').forEach((b) => b.addEventListener('click', () => {
+  action = b.dataset.a;
+  document.querySelectorAll('.act').forEach((x) => x.classList.toggle('on', x === b));
+  $('reasonBox').classList.toggle('hidden', action !== 'noshow');
+  $('dateBox').classList.toggle('hidden', action === 'reconfirmed');
+  if (action === 'reschedule') { $('dateLbl').innerHTML = 'New date <span class="km">ថ្ងៃណាត់ថ្មី</span>'; $('dateHint').textContent = 'Required. The appointment moves to this date. · ត្រូវតែបំពេញ។'; }
+  if (action === 'noshow') { $('dateLbl').innerHTML = 'New date — only if the client already agreed <span class="km">ថ្ងៃថ្មី — បើអតិថិជនយល់ព្រមហើយ</span>'; $('dateHint').textContent = 'Leave empty if no new date yet: Arifin will call to rebook. · ទុកទទេ បើមិនទាន់មានថ្ងៃថ្មី។'; }
+  $('err').textContent = '';
+}));
+
+$('send').addEventListener('click', async () => {
+  const e = [];
+  if (!action) e.push('Choose what happened · ជ្រើសរើសអ្វីដែលកើតឡើង');
+  const nd = $('newDate').value;
+  if (action === 'reschedule' && !nd) e.push('New date · ថ្ងៃណាត់ថ្មី');
+  if (nd && action !== 'reconfirmed' && nd < today) e.push('New date cannot be in the past · ថ្ងៃថ្មីមិនអាចជាថ្ងៃកន្លងហើយ');
+  if (nd && nd === P.get('date') && action === 'reschedule') e.push('New date is the same as now · ថ្ងៃដដែល');
+  if (!$('enteredBy').value) e.push('Updated by · អ្នកកែ');
+  if (e.length) { $('err').innerHTML = 'Please fill: ' + e.join(', '); return; }
+  try { localStorage.setItem('u2be_enteredBy', $('enteredBy').value); } catch (x) {}
+  const k = (() => { try { return window.u2beFormCode || localStorage.getItem('u2be_formcode') || window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beFormCode || window.u2beStaffKey || ''; } })();
+  const payload = { form: 'appt', appt, action, reason: action === 'noshow' ? $('reason').value : '', newDate: action === 'reconfirmed' ? '' : nd,
+    note: $('note').value.trim(), enteredBy: $('enteredBy').value, name: P.get('name') || '', date: P.get('date') || '', k };
+  $('send').disabled = true; $('send').textContent = 'Saving… · កំពុងរក្សាទុក…';
+  try {
+    await fetch(HOOK, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ payload: JSON.stringify(payload) }) });
+    const who = payload.name || 'Client';
+    $('doneText').textContent = action === 'reconfirmed' ? who + ' · reconfirmed'
+      : (nd ? who + ' · moved to ' + fmt(nd) : who + ' · ' + $('reason').selectedOptions[0].text.split(' · ')[0] + ' — Arifin will call to rebook');
+    $('formView').classList.add('hidden'); $('done').classList.remove('hidden');
+  } catch (x) {
+    $('send').disabled = false; $('send').textContent = 'Save · រក្សាទុក';
+    $('err').textContent = 'Not sent — check the internet and try again. · មិនបានផ្ញើ — សូមពិនិត្យអ៊ីនធឺណិត។';
+  }
+});
+</script>
+</body>
+</html>
