@@ -74,6 +74,9 @@
       <label>Treatment type * <span class="km">ប្រភេទវគ្គព្យាបាល</span></label>
       <select id="tType"><option value="">—</option><option>Acless</option><option>FCR</option><option>FOxC</option><option>DNA</option><option>SPIDERMA</option><option>Fusion 8</option><option>Hyper Plasma</option><option>Ozone Plasma</option><option>Warm Plasma (Full Face)</option><option>Upper Eyes</option><option>Lower Eyes</option><option>Nano Touch</option><option value="none">No treatment (products only) · គ្មានវគ្គព្យាបាល</option></select>
       <div id="fromBox">
+        <label>Therapist (who did the treatment) * <span class="km">អ្នកព្យាបាល (អ្នកធ្វើវគ្គព្យាបាល)</span></label>
+        <select id="therapist"><option value="">—</option><option>Sem Sreyphors</option><option>Phan Davy</option><option>Rin Chariya</option><option>Hoeun Sreyhorng</option><option>Phorng Sumai</option><option>Nateng Nao Sim</option><option>Kimhong</option></select>
+        <p class="hint">One person per client. Choose every time — the form does not remember it. <span class="km">មួយនាក់ក្នុងមួយអតិថិជន។ សូមជ្រើសរាល់ពេល។</span></p>
         <label>Sessions from <span class="km">ប្រើវគ្គព្យាបាលរបស់</span></label>
         <div class="radios">
           <label><input type="radio" name="from" value="Own" checked> Own · <span class="km">ខ្លួនឯង</span></label>
@@ -394,6 +397,7 @@ $('review').onclick = () => {
   if (!$('enteredBy').value) e.push('Entered by · អ្នកបញ្ចូល');
   const tt = $('tType').value;
   if (!tt) e.push('Treatment type (or No treatment) · ប្រភេទវគ្គព្យាបាល');
+  if (tt && tt !== 'none' && !$('therapist').value) e.push('Therapist · អ្នកព្យាបាល');
   const from = fromVal();
   if (tt && tt !== 'none' && from === 'Shared' && !$('payer').value.trim()) e.push("Shared: payer's name · ឈ្មោះអ្នកបង់");
   let bought = null;
@@ -453,12 +457,12 @@ $('review').onclick = () => {
   $('err').textContent = '';
   try { localStorage.setItem(LS, $('enteredBy').value); } catch (x) {}
   payload = { form: 'record', phone, name, date: $('date').value, enteredBy: $('enteredBy').value,
-    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5 },
+    today: tt === 'none' ? null : { type: tt, from, payer: from === 'Shared' ? $('payer').value.trim() : '', units: unitsVal(), half: unitsVal() === 0.5, therapist: $('therapist').value },
     bought, products, receipt: selling ? receipt : '', closedBy: selling ? $('closedBy').value : '',
     payment: selling ? (credit && credit.payWithCredit && !(credit.rest > 0) ? 'Homecare Credit' : $('payment').value) : '', sessionPayment: $('payment').value, credit,
     k: (() => { try { return window.u2beFormCode || localStorage.getItem('u2be_formcode') || window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beFormCode || window.u2beStaffKey || ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
-  html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>` : '<br>🩺 No treatment today<br>';
+  html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>👩‍⚕️ Therapist · អ្នកព្យាបាល: <b>${payload.today.therapist}</b><br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
   if (bought) {
     const t = Number(bought.price) - (Number(bought.discountAmount) || 0); total += t;
@@ -490,7 +494,7 @@ $('send').onclick = async () => {
 };
 $('again').onclick = () => {
   ['phone','name','payer','sessions','price','discAmt','sharedWith','bNote','receipt'].forEach(id => $(id).value = '');
-  ['tType','pType','closedBy','payment'].forEach(id => $(id).value = '');
+  ['tType','therapist','pType','closedBy','payment'].forEach(id => $(id).value = '');
   $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
   document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); $('fromBox').classList.remove('hidden');
   $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null; document.querySelector('input[name="units"][value="1"]').checked = true;
