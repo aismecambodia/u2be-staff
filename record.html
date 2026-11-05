@@ -67,6 +67,11 @@
         <div><label>Entered by * <span class="km">អ្នកបញ្ចូល</span></label>
           <select id="enteredBy"><option value="">—</option><option>Chansophal</option><option>Sonita</option><option>Manet</option><option>Nateng Nao Sim</option><option>Kimhong</option><option>Arifin</option><option>Receptionist</option><option>Other</option></select></div>
       </div>
+      <p class="hint" style="margin:4px 0 0">Date = the day the client came (today). The next appointment is made automatically — do not put it here. · ថ្ងៃដែលអតិថិជនមក (ថ្ងៃនេះ)។ ការណាត់បន្ទាប់ ប្រព័ន្ធបង្កើតដោយស្វ័យប្រវត្តិ។</p>
+      <div id="dupBox" style="display:none;margin-top:8px;padding:10px;border:1px solid #C0392B;background:#fbeceb;border-radius:8px;color:#7a1f16">
+        ⚠ <b>This client already has a Client Record on this date.</b> Do NOT send again to fix a mistake — tell Arifin. · <span class="km">អតិថិជននេះមាន Client Record ថ្ងៃនេះរួចហើយ។ កុំផ្ញើម្តងទៀត — សូមប្រាប់បង Arifin។</span>
+        <label style="display:block;margin-top:6px;font-weight:400"><input type="checkbox" id="dupOk"> This is a second, different visit or purchase today (not the same one) · <span class="km">នេះជាការមក ឬការទិញលើកទី២ ផ្សេងពីមុន</span></label>
+      </div>
     </section>
 
     <section>
@@ -247,7 +252,7 @@ const $ = (id) => document.getElementById(id);
 const show = (id) => ['formView','confirmView','doneView'].forEach(v => $(v).classList.toggle('hidden', v !== id));
 const today = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
 const LS = 'u2be_enteredBy';
-$('date').value = today();
+$('date').value = today(); $('date').max = today();
 try { const v = localStorage.getItem(LS); if (v) $('enteredBy').value = v; } catch (e) {}
 const fromVal = () => (document.querySelector('input[name=from]:checked') || {}).value || 'Own';
 const topVal = () => {
@@ -344,6 +349,16 @@ $('posBal').addEventListener('input', () => { $('posBal').dataset.manual = '1'; 
 $('items').addEventListener('input', calcCredit);
 $('items').addEventListener('click', () => setTimeout(calcCredit, 0));
 document.addEventListener('u2be:client', () => setTimeout(calcCredit, 0));
+// Already sent? The lookup returns the dates of this client's latest Client Records (5 Nov 2026).
+function checkDup() {
+  const d = $('date').value, dates = (lk && Array.isArray(lk.recDates)) ? lk.recDates : [];
+  const dup = !!d && dates.includes(d);
+  $('dupBox').style.display = dup ? 'block' : 'none';
+  if (!dup) $('dupOk').checked = false;
+  return dup;
+}
+document.addEventListener('u2be:client', () => setTimeout(checkDup, 0));
+$('date').addEventListener('change', checkDup);
 document.querySelectorAll('input[name=topup]').forEach((r) => r.addEventListener('change', calcCredit));
 $('hasC').addEventListener('change', calcCredit);
 $('pType').onchange = () => { const m = SIZES[$('pType').value]; if (m) $('sessions').value = m; else { $('sessions').value = ''; $('sessions').focus(); } };
@@ -396,6 +411,8 @@ $('review').onclick = () => {
   if (phone.replace(/[^0-9]/g,'').length < 8) e.push('Phone · លេខទូរស័ព្ទ');
   if (!name) e.push('Name · ឈ្មោះ');
   if (!$('date').value) e.push('Date · កាលបរិច្ឆេទ');
+  else if ($('date').value > today()) e.push('Date cannot be after today — the next appointment is made automatically · មិនអាចដាក់ថ្ងៃខាងមុខបានទេ');
+  if (checkDup() && !$('dupOk').checked) e.push('Already a Client Record on this date — tell Arifin, or tick "second, different visit" · មាន Client Record រួចហើយ');
   if (!$('enteredBy').value) e.push('Entered by · អ្នកបញ្ចូល');
   const tt = $('tType').value;
   if (!tt) e.push('Treatment type (or No treatment) · ប្រភេទវគ្គព្យាបាល');
@@ -464,6 +481,8 @@ $('review').onclick = () => {
     payment: selling ? (credit && credit.payWithCredit && !(credit.rest > 0) ? 'Homecare Credit' : $('payment').value) : '', sessionPayment: $('payment').value, credit,
     k: (() => { try { return window.u2beFormCode || localStorage.getItem('u2be_formcode') || window.u2beStaffKey || localStorage.getItem('u2be_staffkey') || ''; } catch (x) { return window.u2beFormCode || window.u2beStaffKey || ''; } })() };
   let html = `<b>${name}</b> · ${phone} · ${payload.date}<br>Entered by ${payload.enteredBy}<br>`;
+  if (payload.date !== today()) html += `<div style="color:#C0392B;margin:4px 0">⚠ Date is <b>${payload.date}</b>, not today — check it is the day the client came. · ថ្ងៃមិនមែនថ្ងៃនេះ</div>`;
+  if ($('dupOk').checked) html += `<div style="color:#C0392B;margin:4px 0">⚠ Second Client Record for this client on this date (different visit / purchase).</div>`;
   html += payload.today ? `<br>🩺 <b>${tt}</b>${payload.today.units !== 1 ? ' · <b>' + (payload.today.units === 0.5 ? '½ HALF session (counts 0.5)' : payload.today.units + ' SESSIONS used') + '</b>' : ''} · sessions: ${from === 'Shared' ? 'shared with ' + payload.today.payer : 'own'}<br>👩‍⚕️ Therapist · អ្នកព្យាបាល: <b>${payload.today.therapist}</b>${payload.today.free ? ' · 🎁 <b>FREE treatment ($0) — no therapist fee</b>' : ''}<br>` : '<br>🩺 No treatment today<br>';
   let total = 0;
   if (bought) {
@@ -497,7 +516,7 @@ $('send').onclick = async () => {
 $('again').onclick = () => {
   ['phone','name','payer','sessions','price','discAmt','sharedWith','bNote','receipt'].forEach(id => $(id).value = '');
   ['tType','therapist','pType','closedBy','payment'].forEach(id => $(id).value = '');
-  $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today();
+  $('disc').value = 'None'; $('pay').value = 'Paid'; $('date').value = today(); $('dupOk').checked = false; $('dupBox').style.display = 'none';
   document.querySelector('input[name=from][value=Own]').checked = true; $('payerBox').classList.add('hidden'); $('fromBox').classList.remove('hidden');
   $('payer').readOnly = false; $('sharedInfo').textContent = ''; lk = null; document.querySelector('input[name="units"][value="1"]').checked = true;
   document.querySelector('input[name=bfor][value=own]').checked = true; $('bSharedBox').classList.add('hidden');
